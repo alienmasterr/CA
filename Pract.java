@@ -15,7 +15,7 @@ import utils.printUtils;
  * Провести групування: заповнити два масиви (або масив структур з 2х значень) для зберігання пари <key> та <average> ,
  * які будуть включати лише унікальні значення <key> та <average> - це средне значення, обраховане для всіх <value>,
  * що відповідають конкретному значенню <key>.
- * Відсортувати алгоритмом merge sort за <average>, та вивести в stdout  значення key від більших до менших
+ * Відсортувати алгоритмом bubble sort за <average>, та вивести в stdout  значення key від більших до менших
  * (average desc), кожен key окремим рядком.
  * Наприклад:
  * a1 1
@@ -30,25 +30,30 @@ import utils.printUtils;
 public class Pract {
 
     public static void main(String[] args) {
-        int size = DataInput.getInt();
-        String[] keys = new String[size];
-        int[] values = new int[size];
 
-        int end = 0;
 
-        for (int i = 0; i < keys.length; i++) {
-            String key = DataInput.getString();
-            int value = DataInput.getInt();
-            keys[i]= key;
-            values[i] = value;
-            System.out.println("1 для переривання циклу");
-            end = DataInput.getInt();
 
-            if (end == 1) {
-                break;
-            }
-        }
-        printUtils.printArray(keys);
+
+
+//        int size = DataInput.getInt();
+//        String[] keys = new String[size];
+//        int[] values = new int[size];
+//
+//        int end = 0;
+//
+//        for (int i = 0; i < keys.length; i++) {
+//            String key = DataInput.getString();
+//            int value = DataInput.getInt();
+//            keys[i]= key;
+//            values[i] = value;
+//            System.out.println("1 для переривання циклу");
+//            end = DataInput.getInt();
+//
+//            if (end == 1) {
+//                break;
+//            }
+//        }
+//        printUtils.printArray(keys);
 
 //        int end = 0;
 //        Dictionary<String, Integer> dict = new Hashtable<>();
