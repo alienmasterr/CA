@@ -29,7 +29,18 @@ import utils.printUtils;
  * a2
  * a1
  */
+
 public class Pract {
+
+    static class Pair {
+        String key;
+        double average;
+
+        public Pair(String key, double average) {
+            this.key = key;
+            this.average = average;
+        }
+    }
 
     public static void main(String[] args) {
 
@@ -42,78 +53,64 @@ public class Pract {
             return;
         }
 
-        List<String> keys = new ArrayList<>();
-        List<Integer> values = new ArrayList<>();
+        List<Pair> pairs = new ArrayList<>();
 
-        readAndSplitFile(file, keys, values);
+        readAndSplitFile(file, pairs);
 
+        Sort.bubbleSort(pairs);
 
-        System.out.println("Ключі: " + keys);
-        System.out.println("Значення: " + values);
+        for (Pair pair : pairs) {
+            System.out.println(pair.key + " " + pair.average);
+        }
+
+        System.out.println("Фінальний результат:");
+        for (Pair pair : pairs) {
+            System.out.println(pair.key);
+        }
     }
 
-    private static void readAndSplitFile(File file, List<String> keys, List<Integer> values) {
+
+    private static void readAndSplitFile(File file, List<Pair> pairs) {
+
+        Map<String, List<Integer>> map = new HashMap<>();
+
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+
             String line;
+
             while ((line = reader.readLine()) != null) {
 
                 String[] parts = line.split(" ");
+
                 if (parts.length == 2) {
 
-                    keys.add(parts[0]);
-                    values.add(Integer.parseInt(parts[1]));
+                    String key = parts[0];
+
+                    int value = Integer.parseInt(parts[1]);
+
+                    if (!map.containsKey(key)) {
+                        map.put(key, new ArrayList<>());
+                    }
+                    map.get(key).add(value);
                 }
             }
         } catch (IOException e) {
+
             System.out.println("Сталася помилка " + e.getMessage());
+        }
+
+        for (Map.Entry<String, List<Integer>> entry : map.entrySet()) {
+
+            String key = entry.getKey();
+
+            List<Integer> values = entry.getValue();
+
+            double average = Sort.calculateAverage(values);
+            pairs.add(new Pair(key, average));
+
         }
     }
 
 }
-
-
-//        int size = DataInput.getInt();
-//        String[] keys = new String[size];
-//        int[] values = new int[size];
-//
-//        int end = 0;
-//
-//        for (int i = 0; i < keys.length; i++) {
-//            String key = DataInput.getString();
-//            int value = DataInput.getInt();
-//            keys[i]= key;
-//            values[i] = value;
-//            System.out.println("1 для переривання циклу");
-//            end = DataInput.getInt();
-//
-//            if (end == 1) {
-//                break;
-//            }
-//        }
-//        printUtils.printArray(keys);
-
-//        int end = 0;
-//        Dictionary<String, Integer> dict = new Hashtable<>();
-//    while (end != 1) {
-//        String key = DataInput.getString();
-//        int value = DataInput.getInt();
-//
-//
-//        dict.put(key, value);
-//        end = DataInput.getInt();
-//    }
-//        System.out.println(dict);
-
-//        Enumeration<String> k = dict.keys();
-//        while (k.hasMoreElements()) {
-//            //String key = k.nextElement();
-//           for (int i=0; i<dict.size(); i++){
-//
-//           }
-////
-////            System.out.println("Key: " + key + ", Value: "
-////                    + dict.get(key));
-//        }
-
 
 
