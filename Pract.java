@@ -2,9 +2,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Dictionary;
-import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.*;
 
 import utils.printUtils;
 
@@ -44,17 +42,34 @@ public class Pract {
             return;
         }
 
+        List<String> keys = new ArrayList<>();
+        List<Integer> values = new ArrayList<>();
+
+        readAndSplitFile(file, keys, values);
+
+
+        System.out.println("Ключі: " + keys);
+        System.out.println("Значення: " + values);
+    }
+
+    private static void readAndSplitFile(File file, List<String> keys, List<Integer> values) {
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
-
             while ((line = reader.readLine()) != null) {
-                System.out.println(line);
+
+                String[] parts = line.split(" ");
+                if (parts.length == 2) {
+
+                    keys.add(parts[0]);
+                    values.add(Integer.parseInt(parts[1]));
+                }
             }
         } catch (IOException e) {
-            System.out.println("помилка: " + e.getMessage());
+            System.out.println("Сталася помилка " + e.getMessage());
         }
     }
 
+}
 
 
 //        int size = DataInput.getInt();
@@ -101,4 +116,4 @@ public class Pract {
 //        }
 
 
-}
+
