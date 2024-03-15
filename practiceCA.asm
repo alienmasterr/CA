@@ -32,8 +32,23 @@ unique_count dw 0 ;каунтер унікальних пар
 
 .code
 main:
-   
 
+;загальна ініціалізація усього та виклик усіх методів
+ mov ax, @data
+    mov ds, ax
+
+    call read_input
+    call group ;отут буде потім якийсь метод групування
+    call sort ;тут буде щось для сортування
+
+    mov ax, 4C00h
+    int 21h
+
+read_input:
+    mov bx, 0  ; stdin handle
+
+;цей метод треба відредагувати під свою програму
+;;;;;;;;;;;;;;;;;;;;;;     
 read_next:
     mov ah, 3Fh
     mov bx, 0h  ; stdin handle
@@ -43,3 +58,6 @@ read_next:
     ; do something with [oneChar]
     or ax,ax
     jnz read_next
+;;;;;;;;;;;;;;;;;;;;;
+
+
