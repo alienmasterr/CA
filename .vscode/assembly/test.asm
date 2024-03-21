@@ -1,6 +1,6 @@
 ; This program reads 23 characters from the keyboard and stores them in an array.
 ; It will be used in future program
-
+;ВИВОДИТЬ ЩОСЬ
 .model small
 .stack 100h
 

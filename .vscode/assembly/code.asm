@@ -54,7 +54,7 @@ bubble_sort endp
 
 output proc
     ; Виведення результатів в stdout
-    ; Реалізація виведення тут
+           ; Викликаємо DOS-функцію для виводу рядка з масиву keysArray
     ret
 output endp
 
