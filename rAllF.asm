@@ -1,8 +1,10 @@
+;ЧИТАЄ ФАЙЛ +++
 .model small
 .stack 100h
 
 .data
-buffer_size equ 255     ; Define the size of the buffer
+;якщо буде більшим кількість знаків в файлі, виводитиме сміття
+buffer_size equ 29     ; Define the size of the buffer
 buffer db buffer_size dup(?)  ; Define a buffer to hold the read characters
 
 .code

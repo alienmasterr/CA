@@ -1,54 +1,37 @@
 .model small
 .stack 100h
-
+; Редагує кількість виведених байтів
 .data
-buffer db 255 dup (?)         ; Буфер для зберігання зчитаних символів
-filename db "test.in", 0      ; Ім'я файлу, що зчитується
+buffer_size equ 10    ; Define the size of the buffer
+buffer db buffer_size dup(?)  ; Define a buffer to hold the read characters
 
 .code
-main:
-    ; Відкриття файлу для читання
-    mov ah, 3Dh          ; DOS функція для відкриття файлу
-    mov al, 00h            ; AL = 0 (режим читання)
-    lea dx, filename     ; Завантаження адреси імені файлу
-    mov cx, 01h
-    int 21h              ; Виклик DOS
+start PROC
+    mov ax, @data       ; Initialize data segment
+    mov ds, ax
 
-    jc open_failed       ; Якщо флаг переносу встановлено, перейти до open_failed
+    call read_file     ; Read from file
+    call write_buffer  ; Write the read content to stdout
 
-    mov bx, ax           ; BX = дескриптор файлу
+    ; Exit program
+    mov ah, 4Ch         ; DOS function to terminate program
+    int 21h             ; Call DOS interrupt
 
-    ; Читання з файлу
-read_loop:
-    mov ah, 3Fh          ; DOS функція для читання з файлу
-    mov cx, 255          ; Максимальна кількість байтів для читання
-    lea dx, buffer       ; Завантаження адреси буфера
-    int 21h              ; Виклик DOS
+read_file:
+    mov ah, 3Fh         ; DOS function to read from file
+    mov bx, 0           ; stdin handle
+    mov cx, buffer_size ; Number of bytes to read (buffer size)
+    mov dx, offset buffer ; Buffer to store the read characters
+    int 21h             ; Call DOS interrupt
+    ret
 
-    jnc read_success     ; Якщо переносу немає, перейти до read_success
+write_buffer:
+    mov ah, 40h         ; DOS function to write to file
+    mov bx, 1           ; stdout handle
+    mov cx, buffer_size ; Number of bytes to write (buffer size)
+    mov dx, offset buffer ; Buffer containing the characters to write
+    int 21h             ; Call DOS interrupt
+    ret
 
-    ; Якщо флаг переносу встановлено, перевірити, чи кінець файлу
-    cmp ax, 0            ; AX містить кількість байтів, що було прочитано
-    je read_success      ; Якщо AX = 0, досягнуто кінець файлу
-
-    ; Обробка помилки читання
-    ; Тут ви можете додати код обробки помилок
-
-read_success:
-    ; Виведення зчитаного буфера в консоль
-    mov ah, 9            ; DOS функція для виводу рядка
-    lea dx, buffer       ; Завантаження адреси буфера
-    int 21h              ; Виклик DOS
-
-    ; Продовжувати читання до кінця файлу
-    jmp read_loop
-
-open_failed:
-    ; Обробка помилки відкриття файлу
-    ; Тут ви можете додати код обробки помилок
-
-    ; Вихід з програми
-    mov ah, 4Ch          ; DOS функція для завершення програми
-    int 21h              ; Виклик DOS
-
-end main
+start ENDP
+end start
