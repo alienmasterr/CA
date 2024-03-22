@@ -5,6 +5,7 @@
 
 
 
+
         
 
 
@@ -16,7 +17,7 @@
             "run": [
                 "TASM ${file}",
                 "TLINK ${filename}",
-                ">${filename} < test.in"
+                ">V3TEST ${filename}"
             ],
             "debug": [
                 "TASM /zi ${file}",
