@@ -1,7 +1,10 @@
 {
-    "masmtasm.ASM.mode": "single file",
+    "masmtasm.ASM.mode": "workspace",
     "masmtasm.ASM.emulator": "jsdos",
     "masmtasm.ASM.actions": {
+
+
+
         
 
 
