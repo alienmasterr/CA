@@ -1,3 +1,4 @@
+
 compare_strings:
     mov cx, 0           ; Завдання лічильника
 
