@@ -1,7 +1,7 @@
 .model small
 .stack 100h
 ;ГОВОРИТЬ КИТАЙСЬКОЮ АЛЕ ХОЧ ГОВОРИТЬ
-;воно кидає 17
+;воно кидає 0
 .data
 buffer_size equ 29     ; Define the size of the buffer
 buffer db buffer_size dup(?)  ; Define a buffer to hold the read characters
@@ -42,33 +42,6 @@ process_buffer PROC
     ret
 process_buffer ENDP
 
-; read_key_value PROC
-;     mov di, offset key_buffer ; Set DI to point to key_buffer
-;     mov cx, 16 ; Maximum length of key
-;     read_key:
-;         lodsb ; Load byte from SI into AL, and increment SI
-;         cmp al, ' ' ; Check for space
-;         je end_read_key ; If space, end of key
-;         stosb ; Store AL into DI, and increment DI
-;     loop read_key
-;     end_read_key:
-;     mov byte ptr [di], 0 ; Null terminate key
-;     mov di, offset value_buffer ; Set DI to point to value_buffer
-;     mov cx, 6 ; Maximum length of value
-;     read_value:
-;         lodsb ; Load byte from SI into AL, and increment SI
-;         cmp al, 13 ; Check for carriage return
-;         je end_read_value ; If carriage return, end of value
-;         stosb ; Store AL into DI, and increment DI
-;     loop read_value
-
-;     end_read_value:
-;     mov byte ptr [di], 0 ; Null terminate value
-;     call convert_to_binary ; Convert value to binary
-;     ret
-   
-; read_key_value ENDP
-
 
 read_key_value PROC
     mov di, offset key_buffer ; Set DI to point to key_buffer
@@ -108,6 +81,7 @@ convert_loop:
 
     sub al, '0'            ; Convert ASCII character to integer
     shl ax, 1              ; Shift left to make room for the new bit
+    add ax, ax             ; Multiply current binary value by 2 (same as shift left)
     add ax, di             ; Add the current digit to the binary value in AX
 
     jmp convert_loop       ; Repeat for the next digit
@@ -116,7 +90,6 @@ end_convert_to_binary:
     call print_result      ; Print the binary representation as decimal
     ret
 convert_to_binary ENDP
-
 
 print_result PROC
     mov cx, 16            ; Number of bits to print (assuming 16-bit value)
