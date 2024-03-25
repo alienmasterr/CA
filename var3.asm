@@ -242,17 +242,43 @@ average_loop:
     inc si              ; Move to the next value in keys_average
     loop average_loop   ; Repeat until all values are processed
 
-
     ; At this point, the sum is in DX:AX
-
 
     ; Now, we divide the 32-bit sum by the count of keys (keys_count = 10000)
     mov bx, keys_count  ; Load count of keys
     xor dx, dx          ; Clear DX for division
     div bx              ; DX:AX / BX, result in AX
 
-
     ; AX now holds the average value
+
+    search_values_for_current_key:
+    mov si, dx               ; Store the address in dx into si
+
+    cmp byte ptr [si], bl   ; Compare the current key with the key in the array
+    jne next_key            ; If keys don't match, jump to the next key
+    add ax, word ptr [di]   ; Add the corresponding value to the sum
+    inc cx                  ; Increment the counter for the number of values
+
+next_key:
+    inc dx                ; Перехід до наступного ключа у масиві ключів
+    inc di                ; Перехід до наступного значення у масиві значень
+    cmp dx, offset keys + keys_count ; Перевірка на кінець масиву ключів
+    jne search_values_for_current_key ; Якщо не кінець масиву, продовження пошуку
+    cmp cx, 0            ; Перевірка чи були знайдені значення для поточного ключа
+    je no_values_found   ; Якщо значень не знайдено, перехід до наступного ключа
+    cwd                  ; Розширення AX до DX:AX для ділення
+    idiv cx              ; Ділення суми на кількість значень
+    mov [bx], ax         ; Зберігання середнього значення в масиві середніх значень
+no_values_found:
+    inc si               ; Перехід до наступного ключа у масиві ключів
+    inc bx               ; Перехід до наступного значення у масиві середніх значень
+    cmp si, offset keys + keys_count ; Перевірка на кінець масиву ключів
+    jne average_loop       ; Якщо не кінець масиву, продовження обчислень
+    ret
+
+
+
+
 
 read_file:
     mov ah, 3Fh         ; DOS function to read from file
