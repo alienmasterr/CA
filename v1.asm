@@ -55,6 +55,21 @@ parse_input:
 
     ret
 
+overflow_detected:
+    ; Обробка переповнення при додаванні
+    ; Наприклад, можна вивести повідомлення про переповнення
+    mov ax, 0              ; Ставимо в регістр AX значення 0, яке буде позначати помилку
+    jmp end_parse_input    ; Перехід до кінця процедури
+
+overflow_detected_avg:
+    ; Обробка переповнення при обчисленні середнього
+    ; Наприклад, можна вивести повідомлення про переповнення
+    mov ax, 0              ; Ставимо в регістр AX значення 0, яке буде позначати помилку
+    jmp end_parse_input    ; Перехід до кінця процедури
+
+end_parse_input:
+    ret
+
 read_file:
     mov ah, 3Fh         ; DOS function to read from file
     mov bx, 0           ; stdin handle
