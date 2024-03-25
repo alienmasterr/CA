@@ -19,10 +19,15 @@ start PROC
     mov ax, @data       ; Ініціалізація сегмента даних
     mov ds, ax
 
-    call read_file     ; Read from file
+    
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;виклики всіх функцій
+    call read_file     ; Read from file
+    call parse_input   ; Розбір введення
+    call calculate_average   ; Обчислення середніх значень
+    call bubble_sort   ; Сортування
+    call write_sorted_keys  ; Виведення відсортованих ключів
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
     ; Вихід з програми
