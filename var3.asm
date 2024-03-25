@@ -77,7 +77,6 @@ parse_loop:
     mov byte ptr [di], 0  ; Додавання завершуючого нуля до ключа
     inc di             ; Перехід до наступного елемента в масиві ключів
 
-
     ; Пропуск пробілу
     mov al, byte ptr [si]
     cmp al, ' '
@@ -92,7 +91,6 @@ skip_whitespace:
     mov byte ptr [bx], 0  ; Додавання завершуючого нуля до значення
     inc bx             ; Перехід до наступного елемента в масиві значень
 
-
     ; Пропуск пробілу
     mov al, byte ptr [si]
     cmp al, ' '
@@ -100,7 +98,6 @@ skip_whitespace:
     inc si
 
 skip_whitespace2:
-
 
     ; Перевірка кінця рядка
     mov al, byte ptr [si]
