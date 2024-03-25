@@ -122,6 +122,28 @@ next_line:
 end_of_input:
     ret
 
+read_key:
+    xor cx, cx         ; CX = 0
+read_key_loop:
+    mov al, byte ptr [si]  ; Зчитування символу
+    cmp al, ' '        ; Перевірка на пробіл
+    je end_read_key    ; Якщо зустрівся пробіл, кінець ключа
+    cmp al, 0Dh        ; Перевірка на кінець рядка
+    je end_read_key
+    cmp al, 0Ah        ; Перевірка на кінець рядка
+    je end_read_key
+    mov byte ptr [di], al  ; Запис символу у масив ключів
+    inc di             ; Перехід до наступного елемента масиву
+    inc si             ; Перехід до наступного символу
+    inc cx             ; Збільшення лічильника символів ключа
+    cmp cx, 16         ; Перевірка на максимальну довжину ключа
+    je end_read_key
+    jmp read_key_loop  ; Перехід до наступного символу
+
+end_read_key:
+    ret
+
+
 read_file:
     mov ah, 3Fh         ; DOS function to read from file
     mov bx, 0           ; stdin handle
