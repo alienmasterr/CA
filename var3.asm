@@ -299,6 +299,67 @@ skip_swap:
     jnz outer_loop        ; Перехід, якщо не кінець зовнішнього циклу
     ret
 
+write_sorted_keys:
+    mov si, offset keys_average  ; Початок масиву середніх значень
+    mov cx, keys_count            ; Кількість ключів для виведення
+write_loop:
+    mov ax, [si]          ; Завантаження середнього значення
+    call write_number     ; Виведення середнього значення
+    mov dl, ' '           ; Пробіл між середнім значенням та ключем
+    mov ah, 2             ; Функція DOS для виведення символа
+    int 21h               ; Виклик переривання DOS
+    mov si, offset keys  ; Початок масиву ключів
+    call write_string    ; Виведення ключа
+    mov dl, 0Dh           ; Символ переведення рядка
+    mov ah, 2             ; Функція DOS для виведення символа
+    int 21h               ; В
+call write_sorted_keys      
+call write_loop
+    ; mov ax, [si]          ; Завантаження середнього значення
+    ; call write_number     ; Виведення середнього значення
+    ; mov dl, ' '           ; Пробіл між середнім значенням та ключем
+    ; mov ah, 2             ; Функція DOS для виведення символа
+    ; int 21h               ; Виклик переривання DOS
+    ; mov si, offset keys  ; Початок масиву ключів
+    ; call write_string    ; Виведення ключа
+    ; mov dl, 0Dh           ; Символ переведення рядка
+    ; mov ah, 2             ; Функція DOS для виведення символа
+    ; int 21h  
+                 ; Виклик переривання DOS
+    mov dl, 0Ah           ; Символ переведення рядка
+    mov ah, 2             ; Функція DOS для виведення символа
+    int 21h               ; Виклик переривання DOS
+    add si, 2             ; Перехід до наступного середнього значення
+    loop write_loop       ; Повторення виведення для наступного ключа
+    ret
+
+
+write_number:
+    push ax               ; Збереження регістра AX
+    mov bx, 10            ; База десяткової системи числення
+    xor cx, cx            ; CX = 0 (лічильник цифр)
+    mov dx, 0             ; Обнулення DX (результуючого числа)
+digit_loop:
+    xor dx, dx            ; Обнулення DX перед кожним поділом
+    div bx                ; Ділення AX на 10, результат у DX (остача) та AX (ціла частина)
+    push dx               ; Збереження остачі у стеку
+    inc cx                ; Збільшення лічильника цифр
+    test ax, ax           ; Перевірка, чи AX ще містить значення
+    jnz digit_loop        ; Якщо є ще цифри, повторення
+print_digits:
+    pop dx                ; Витягування цифри зі стеку
+    add dl, '0'           ; Перетворення числа у символ
+    mov ah, 2             ; Функція DOS для виведення символа
+    int 21h               ; Виклик переривання DOS
+    loop print_digits     ; Виведення всіх цифр
+    pop ax                ; Відновлення регістра AX
+    ret
+
+
+write_string:
+    mov ah, 9             ; Функція DOS для виведення рядка
+    int 21h               ; Виклик переривання DOS
+    ret
 
 read_file:
     mov ah, 3Fh         ; DOS function to read from file
@@ -307,6 +368,16 @@ read_file:
     mov dx, offset buffer ; Buffer to store the read characters
     int 21h             ; Call DOS interrupt
     ret
+
+end_program:
+    ; Завершення роботи програми
+    mov ah, 4Ch         ; Функція DOS для завершення програми
+    int 21h             ; Виклик переривання DOS
+    ret                 ; Повернення з підпрограми
+
+
+    ; Завершення програми
+    jmp end_program
 
 start ENDP
 end start
