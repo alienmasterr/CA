@@ -1,7 +1,7 @@
 .model small
 .stack 100h
 ;ГОВОРИТЬ КИТАЙСЬКОЮ АЛЕ ХОЧ ГОВОРИТЬ
-;воно бігає
+;воно кидає 17
 .data
 buffer_size equ 29     ; Define the size of the buffer
 buffer db buffer_size dup(?)  ; Define a buffer to hold the read characters
@@ -36,7 +36,7 @@ process_buffer PROC
         call read_key_value ; Read key and value from buffer
         cmp byte ptr [si], 0 ; Check for end of buffer
         je end_process_buffer
-        add si, 2 ; Move to the next line
+        add si, 29 ; Move to the next line, assuming each line is 29 bytes long (including newline characters)
     jmp next_line
     end_process_buffer:
     ret
@@ -98,36 +98,42 @@ read_key_value ENDP
 
 
 convert_to_binary PROC
-    xor ax, ax ; Clear AX
-    mov si, offset value_buffer ; Set SI to point to value_buffer
-    mov di, offset key_buffer ; Set DI to point to key_buffer
-    next_digit:
-        lodsb ; Load byte from SI into AL, and increment SI
-        cmp al, 0 ; Check for null terminator
-        je end_convert_to_binary ; If null terminator, end of value
-        sub al, '0' ; Convert character to integer
-        
-        mov bx, ax    ; Save the original value of AX
-        add ax, ax    ; Multiply by 2
-        add ax, bx    ; Add the original value to get the result of multiplying by 3
-        add ax, ax    ; Multiply by 2 (resulting in multiplication by 6)
-        add ax, bx    ; Add the original value to get the result of multiplying by 10
+    xor ax, ax             ; Clear AX
+    mov si, offset value_buffer  ; Set SI to point to value_buffer
 
-        add ax, ax ; Multiply existing value by 10
-        add ax, ax ; Multiply existing value by 10
-        add ax, di ; Add current digit to value
-    jmp next_digit
-    end_convert_to_binary:
-    ; AX now contains binary representation of value
-    call print_result ; Print the binary representation as decimal
+convert_loop:
+    lodsb                  ; Load byte from SI into AL, and increment SI
+    cmp al, 0              ; Check for null terminator
+    je end_convert_to_binary   ; If null terminator, end of value
+
+    sub al, '0'            ; Convert ASCII character to integer
+    shl ax, 1              ; Shift left to make room for the new bit
+    add ax, di             ; Add the current digit to the binary value in AX
+
+    jmp convert_loop       ; Repeat for the next digit
+    
+end_convert_to_binary:
+    call print_result      ; Print the binary representation as decimal
     ret
 convert_to_binary ENDP
 
+
 print_result PROC
-    mov bx, ax        ; Move the binary representation to BX
-    mov cx, 10        ; Set CX to 10 for division by 10
-    mov di, 10        ; Set DI to 10 for iteration count
-    mov si, offset value_buffer + 5 ; Point SI to the end of value_buffer
+    mov cx, 16            ; Number of bits to print (assuming 16-bit value)
+    mov si, 16            ; Position of the most significant bit
+print_loop:
+    mov dx, 0             ; Clear DX register for division
+    mov bx, 2             ; Divisor (binary, i.e., 2)
+    div bx                ; Divide AX by BX (AX contains the binary value)
+    add dl, '0'           ; Convert remainder to ASCII
+    mov ah, 02h           ; Function to print character
+    int 21h               ; Print the ASCII character
+    dec si                ; Move to the next bit
+    test si, si           ; Check if we've printed all bits
+    jnz print_loop        ; If not, continue loop
+    ret
+print_result ENDP
+
 
 convert_to_decimal:
     xor dx, dx        ; Clear DX for division
@@ -146,6 +152,6 @@ convert_to_decimal:
     int 21h           ; Call DOS interrupt
 
     ret
-print_result ENDP
+
 
 end start
