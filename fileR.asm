@@ -1,7 +1,7 @@
 .model small
 .stack 100h
 ;ГОВОРИТЬ КИТАЙСЬКОЮ АЛЕ ХОЧ ГОВОРИТЬ
-
+;воно бігає
 .data
 buffer_size equ 29     ; Define the size of the buffer
 buffer db buffer_size dup(?)  ; Define a buffer to hold the read characters
@@ -97,31 +97,6 @@ read_key_value PROC
 read_key_value ENDP
 
 
-; convert_to_binary PROC
-;     xor ax, ax ; Clear AX
-;     mov si, offset value_buffer ; Set SI to point to value_buffer
-;     mov di, offset key_buffer ; Set DI to point to key_buffer
-;     next_digit:
-;         lodsb ; Load byte from SI into AL, and increment SI
-;         cmp al, 0 ; Check for null terminator
-;         je end_convert_to_binary ; If null terminator, end of value
-;         sub al, '0' ; Convert character to integer
-        
-;         mov bx, ax    ; Save the original value of AX
-;         add ax, ax    ; Multiply by 2
-;         add ax, bx    ; Add the original value to get the result of multiplying by 3
-;         add ax, ax    ; Multiply by 2 (resulting in multiplication by 6)
-;         add ax, bx    ; Add the original value to get the result of multiplying by 10
-
-;         add ax, ax ; Multiply existing value by 10
-;         add ax, ax ; Multiply existing value by 10
-;         add ax, di ; Add current digit to value
-;     jmp next_digit
-;     end_convert_to_binary:
-;     ; AX now contains binary representation of value
-;     call print_result ; Print the binary representation as decimal
-;     ret
-
 convert_to_binary PROC
     xor ax, ax ; Clear AX
     mov si, offset value_buffer ; Set SI to point to value_buffer
@@ -131,17 +106,16 @@ convert_to_binary PROC
         cmp al, 0 ; Check for null terminator
         je end_convert_to_binary ; If null terminator, end of value
         sub al, '0' ; Convert character to integer
+        
+        mov bx, ax    ; Save the original value of AX
+        add ax, ax    ; Multiply by 2
+        add ax, bx    ; Add the original value to get the result of multiplying by 3
+        add ax, ax    ; Multiply by 2 (resulting in multiplication by 6)
+        add ax, bx    ; Add the original value to get the result of multiplying by 10
 
-        mov bx, ax        ; Store the original value in BX
-
-shl ax, 1         ; Multiply by 2
-shl ax, 1         ; Multiply by 4 (resulting in multiplication by 2 * 2)
-add ax, bx        ; Add the original value to get 5 times the original value
-
-mov bx, ax        ; Store the result in BX for the next multiplication
-
-shl ax, 1         ; Multiply by 2 (resulting in multiplication by 10)
-add ax, bx        ; Add the original value (multiplied by 5) to get 10 times the original value
+        add ax, ax ; Multiply existing value by 10
+        add ax, ax ; Multiply existing value by 10
+        add ax, di ; Add current digit to value
     jmp next_digit
     end_convert_to_binary:
     ; AX now contains binary representation of value
