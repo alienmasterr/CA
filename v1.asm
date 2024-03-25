@@ -70,6 +70,58 @@ overflow_detected_avg:
 end_parse_input:
     ret
 
+parse_loop:
+    ; Зчитування ключа
+    mov cx, 16         ; Максимальна довжина ключа
+    call read_key      ; Процедура для зчитування ключа
+    mov byte ptr [di], 0  ; Додавання завершуючого нуля до ключа
+    inc di             ; Перехід до наступного елемента в масиві ключів
+
+
+    ; Пропуск пробілу
+    mov al, byte ptr [si]
+    cmp al, ' '
+    jne skip_whitespace
+    inc si
+
+skip_whitespace:
+   
+    ; Зчитування значення
+    mov cx, 5          ; Максимальна довжина значення
+    call read_value    ; Процедура для зчитування значення
+    mov byte ptr [bx], 0  ; Додавання завершуючого нуля до значення
+    inc bx             ; Перехід до наступного елемента в масиві значень
+
+
+    ; Пропуск пробілу
+    mov al, byte ptr [si]
+    cmp al, ' '
+    jne skip_whitespace2
+    inc si
+
+skip_whitespace2:
+
+
+    ; Перевірка кінця рядка
+    mov al, byte ptr [si]
+    cmp al, 0Dh
+    je next_line
+    cmp al, 0Ah
+    je next_line
+    jmp parse_loop   ; Перехід до наступного символу
+
+next_line:
+    inc si            ; Пропуск символу переведення рядка
+    mov al, byte ptr [si]
+    cmp al, 0Ah      ; Перевірка на наступний символ переведення рядка
+    je end_of_input  ; Якщо кінець введення
+    inc si           ; Пропуск 0Dh
+    jmp parse_loop  ; Перехід до наступного рядка
+
+
+end_of_input:
+    ret
+
 read_file:
     mov ah, 3Fh         ; DOS function to read from file
     mov bx, 0           ; stdin handle
