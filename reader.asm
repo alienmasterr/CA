@@ -4,7 +4,7 @@
 
 .data
 ;якщо буде більшим кількість знаків в файлі, виводитиме сміття
-buffer_size equ 29     ; Define the size of the buffer
+buffer_size equ 33     ; Define the size of the buffer
 buffer db buffer_size dup(?)  ; Define a buffer to hold the read characters
 
 .code

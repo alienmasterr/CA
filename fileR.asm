@@ -1,6 +1,6 @@
 .model small
 .stack 100h
-
+;ГОВОРИТЬ КИТАЙСЬКОЮ АЛЕ ХОЧ ГОВОРИТЬ
 .data
 buffer_size equ 29     ; Define the size of the buffer
 buffer db buffer_size dup(?)  ; Define a buffer to hold the read characters
@@ -41,6 +41,34 @@ process_buffer PROC
     ret
 process_buffer ENDP
 
+; read_key_value PROC
+;     mov di, offset key_buffer ; Set DI to point to key_buffer
+;     mov cx, 16 ; Maximum length of key
+;     read_key:
+;         lodsb ; Load byte from SI into AL, and increment SI
+;         cmp al, ' ' ; Check for space
+;         je end_read_key ; If space, end of key
+;         stosb ; Store AL into DI, and increment DI
+;     loop read_key
+;     end_read_key:
+;     mov byte ptr [di], 0 ; Null terminate key
+;     mov di, offset value_buffer ; Set DI to point to value_buffer
+;     mov cx, 6 ; Maximum length of value
+;     read_value:
+;         lodsb ; Load byte from SI into AL, and increment SI
+;         cmp al, 13 ; Check for carriage return
+;         je end_read_value ; If carriage return, end of value
+;         stosb ; Store AL into DI, and increment DI
+;     loop read_value
+
+;     end_read_value:
+;     mov byte ptr [di], 0 ; Null terminate value
+;     call convert_to_binary ; Convert value to binary
+;     ret
+   
+; read_key_value ENDP
+
+
 read_key_value PROC
     mov di, offset key_buffer ; Set DI to point to key_buffer
     mov cx, 16 ; Maximum length of key
@@ -52,6 +80,7 @@ read_key_value PROC
     loop read_key
     end_read_key:
     mov byte ptr [di], 0 ; Null terminate key
+    
     mov di, offset value_buffer ; Set DI to point to value_buffer
     mov cx, 6 ; Maximum length of value
     read_value:
@@ -66,6 +95,32 @@ read_key_value PROC
     ret
 read_key_value ENDP
 
+
+; convert_to_binary PROC
+;     xor ax, ax ; Clear AX
+;     mov si, offset value_buffer ; Set SI to point to value_buffer
+;     mov di, offset key_buffer ; Set DI to point to key_buffer
+;     next_digit:
+;         lodsb ; Load byte from SI into AL, and increment SI
+;         cmp al, 0 ; Check for null terminator
+;         je end_convert_to_binary ; If null terminator, end of value
+;         sub al, '0' ; Convert character to integer
+        
+;         mov bx, ax    ; Save the original value of AX
+;         add ax, ax    ; Multiply by 2
+;         add ax, bx    ; Add the original value to get the result of multiplying by 3
+;         add ax, ax    ; Multiply by 2 (resulting in multiplication by 6)
+;         add ax, bx    ; Add the original value to get the result of multiplying by 10
+
+;         add ax, ax ; Multiply existing value by 10
+;         add ax, ax ; Multiply existing value by 10
+;         add ax, di ; Add current digit to value
+;     jmp next_digit
+;     end_convert_to_binary:
+;     ; AX now contains binary representation of value
+;     call print_result ; Print the binary representation as decimal
+;     ret
+
 convert_to_binary PROC
     xor ax, ax ; Clear AX
     mov si, offset value_buffer ; Set SI to point to value_buffer
@@ -75,21 +130,54 @@ convert_to_binary PROC
         cmp al, 0 ; Check for null terminator
         je end_convert_to_binary ; If null terminator, end of value
         sub al, '0' ; Convert character to integer
-        
-        mov bx, ax    ; Save the original value of AX
-        add ax, ax    ; Multiply by 2
-        add ax, bx    ; Add the original value to get the result of multiplying by 3
-        add ax, ax    ; Multiply by 2 (resulting in multiplication by 6)
-        add ax, bx    ; Add the original value to get the result of multiplying by 10
 
-        add ax, ax ; Multiply existing value by 10
-        add ax, ax ; Multiply existing value by 10
+        mov bx, ax
+        shl ax, 1    ; Multiply by 2
+        shl ax, 1    ; Multiply by 2
+        add ax, bx  ; Add the original value to get the result of multiplying by 5
+
+        mov bx, ax
+        shl ax, 1    ; Multiply by 2
+        shl ax, 1    ; Multiply by 2
+        shl ax, 1    ; Multiply by 2
+        add ax, bx  ; Add the original value to get the result of multiplying by 20
+
+        mov bx, ax
+        shl ax, 1    ; Multiply by 2
+        shl ax, 1    ; Multiply by 2
+        add ax, bx  ; Add the original value to get the result of multiplying by 10
+
         add ax, di ; Add current digit to value
     jmp next_digit
     end_convert_to_binary:
     ; AX now contains binary representation of value
     call print_result ; Print the binary representation as decimal
     ret
+convert_to_binary ENDP
+
+
+; print_result PROC
+;     mov bx, ax        ; Move the binary representation to BX
+;     mov cx, 10        ; Set CX to 10 for division by 10
+;     mov di, 10        ; Set DI to 10 for iteration count
+;     mov si, offset value_buffer + 5 ; Point SI to the end of value_buffer
+
+; convert_to_decimal:
+;     xor dx, dx        ; Clear DX for division
+;     div cx            ; Divide BX by 10, quotient in AX, remainder in DX
+;     add dl, '0'       ; Convert remainder to ASCII
+;     dec si            ; Move SI to the left
+;     mov [si], dl      ; Store ASCII digit
+;     dec di            ; Decrement iteration count
+;     test ax, ax      ; Check if quotient is zero
+;     jnz convert_to_decimal  ; If not zero, continue conversion
+
+;     mov dx, offset value_buffer  ; Point DX to the beginning of the converted string
+;     mov ah, 9         ; DOS function to print string
+;     int 21h           ; Call DOS interrupt
+
+;     ret
+; print_result ENDP
 
 print_result PROC
     mov bx, ax        ; Move the binary representation to BX
@@ -106,6 +194,8 @@ convert_to_decimal:
     dec di            ; Decrement iteration count
     test ax, ax      ; Check if quotient is zero
     jnz convert_to_decimal  ; If not zero, continue conversion
+
+    mov byte ptr [si - 1], '$' ; Null-terminate the string before printing
 
     mov dx, offset value_buffer  ; Point DX to the beginning of the converted string
     mov ah, 9         ; DOS function to print string
