@@ -4,3 +4,14 @@
 ; Підпрограма для конвертації десяткового значення у вигляді рядка в бінарне представлення (слово) у доповнювальному коді
 ; Приймає рядок з десятковим числом в DX, повертає бінарне представлення в AX
 
+.model small
+.stack 100h
+
+.data
+
+.code
+
+decimal_top:
+    push bx
+    xor dx, dx
+    mov ;     mov bx, ax        ; Move the binary representation to BX

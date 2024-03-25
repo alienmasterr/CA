@@ -1,6 +1,7 @@
 .model small
 .stack 100h
 ;ГОВОРИТЬ КИТАЙСЬКОЮ АЛЕ ХОЧ ГОВОРИТЬ
+
 .data
 buffer_size equ 29     ; Define the size of the buffer
 buffer db buffer_size dup(?)  ; Define a buffer to hold the read characters
@@ -22,7 +23,7 @@ start ENDP
 
 read_file PROC
     mov ah, 3Fh         ; DOS function to read from file
-    mov bx, 0           ; stdin handle
+    mov bx, 0           ; stdin handleс 
     mov cx, buffer_size ; Number of bytes to read (buffer size)
     mov dx, offset buffer ; Buffer to store the read characters
     int 21h             ; Call DOS interrupt
@@ -90,9 +91,9 @@ read_key_value PROC
         stosb ; Store AL into DI, and increment DI
     loop read_value
     end_read_value:
-    mov byte ptr [di], 0 ; Null terminate value
-    call convert_to_binary ; Convert value to binary
-    ret
+        mov byte ptr [di], 0 ; Null terminate value
+        call convert_to_binary ; Convert value to binary
+        ret
 read_key_value ENDP
 
 
@@ -131,53 +132,22 @@ convert_to_binary PROC
         je end_convert_to_binary ; If null terminator, end of value
         sub al, '0' ; Convert character to integer
 
-        mov bx, ax
-        shl ax, 1    ; Multiply by 2
-        shl ax, 1    ; Multiply by 2
-        add ax, bx  ; Add the original value to get the result of multiplying by 5
+        mov bx, ax        ; Store the original value in BX
 
-        mov bx, ax
-        shl ax, 1    ; Multiply by 2
-        shl ax, 1    ; Multiply by 2
-        shl ax, 1    ; Multiply by 2
-        add ax, bx  ; Add the original value to get the result of multiplying by 20
+shl ax, 1         ; Multiply by 2
+shl ax, 1         ; Multiply by 4 (resulting in multiplication by 2 * 2)
+add ax, bx        ; Add the original value to get 5 times the original value
 
-        mov bx, ax
-        shl ax, 1    ; Multiply by 2
-        shl ax, 1    ; Multiply by 2
-        add ax, bx  ; Add the original value to get the result of multiplying by 10
+mov bx, ax        ; Store the result in BX for the next multiplication
 
-        add ax, di ; Add current digit to value
+shl ax, 1         ; Multiply by 2 (resulting in multiplication by 10)
+add ax, bx        ; Add the original value (multiplied by 5) to get 10 times the original value
     jmp next_digit
     end_convert_to_binary:
     ; AX now contains binary representation of value
     call print_result ; Print the binary representation as decimal
     ret
 convert_to_binary ENDP
-
-
-; print_result PROC
-;     mov bx, ax        ; Move the binary representation to BX
-;     mov cx, 10        ; Set CX to 10 for division by 10
-;     mov di, 10        ; Set DI to 10 for iteration count
-;     mov si, offset value_buffer + 5 ; Point SI to the end of value_buffer
-
-; convert_to_decimal:
-;     xor dx, dx        ; Clear DX for division
-;     div cx            ; Divide BX by 10, quotient in AX, remainder in DX
-;     add dl, '0'       ; Convert remainder to ASCII
-;     dec si            ; Move SI to the left
-;     mov [si], dl      ; Store ASCII digit
-;     dec di            ; Decrement iteration count
-;     test ax, ax      ; Check if quotient is zero
-;     jnz convert_to_decimal  ; If not zero, continue conversion
-
-;     mov dx, offset value_buffer  ; Point DX to the beginning of the converted string
-;     mov ah, 9         ; DOS function to print string
-;     int 21h           ; Call DOS interrupt
-
-;     ret
-; print_result ENDP
 
 print_result PROC
     mov bx, ax        ; Move the binary representation to BX
