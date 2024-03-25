@@ -161,9 +161,9 @@ read_value_loop:
     je end_read_value
     jmp read_value_loop  ; Перехід до наступного символу
 
-
 end_read_value:
     ret
+
 
 
 read_file:
