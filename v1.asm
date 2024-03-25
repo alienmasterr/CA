@@ -143,6 +143,28 @@ read_key_loop:
 end_read_key:
     ret
 
+read_value:
+    xor cx, cx         ; CX = 0
+read_value_loop:
+    mov al, byte ptr [si]  ; Зчитування символу
+    cmp al, ' '        ; Перевірка на пробіл
+    je end_read_value    ; Якщо зустрівся пробіл, кінець значення
+    cmp al, 0Dh        ; Перевірка на кінець рядка
+    je end_read_value
+    cmp al, 0Ah        ; Перевірка на кінець рядка
+    je end_read_value
+    mov byte ptr [bx], al  ; Запис символу у масив значень
+    inc bx             ; Перехід до наступного елемента масиву
+    inc si             ; Перехід до наступного символу
+    inc cx             ; Збільшення лічильника символів значення
+    cmp cx, 5         ; Перевірка на максимальну довжину значення
+    je end_read_value
+    jmp read_value_loop  ; Перехід до наступного символу
+
+
+end_read_value:
+    ret
+
 
 read_file:
     mov ah, 3Fh         ; DOS function to read from file
