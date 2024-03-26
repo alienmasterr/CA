@@ -4,7 +4,7 @@
 
 .data
 
-file_error_message db "error $"
+;file_error_message db "error $"
 not_fucked db "f $", 0Dh, 0Ah
 
 file dw 0
