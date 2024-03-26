@@ -309,27 +309,28 @@ no_values_found:
 
 
 bubble_sort:
-    mov si, offset keys_average  ; Початок масиву середніх значень
+    ;mov si, offset keys_average  ; Початок масиву середніх значень
+    mov ax, seg keys_average      ; Load the segment part of the address into AX
+    lea bx, keys_average   
+    mov si, bx                    ; Move the offset into SI
+    mov ds, ax                    ; Load the segment into the DS register                    
     mov cx, keys_count            ; Кількість ключів для сортування
-outer_loop:
-    mov di, si            ; Початок поточного проходження
-    mov bx, cx            ; Зберігання кількості порівнянь
-inner_loop:
-    mov ax, [di]          ; Завантаження першого значення
-    mov dx, [di + 2]      ; Завантаження другого значення
-    cmp ax, dx            ; Порівняння
-    jge skip_swap         ; Перехід, якщо поточний елемент менший або рівний наступному
-    xchg ax, dx           ; Обмін значень
-    mov [di], ax          ; Зберігання першого значення
-    mov [di + 2], dx      ; Зберігання другого значення
-skip_swap:
-    add di, 4             ; Перехід до наступної пари значень
-    dec bx                ; Зменшення лічильника порівнянь
-    jnz inner_loop        ; Перехід, якщо не кінець внутрішнього циклу
-    dec cx                ; Зменшення лічильника ключів
-    jnz outer_loop        ; Перехід, якщо не кінець зовнішнього циклу
+outerLoop:
+    push cx
+    mov di, si ;!!!!!!!
+innerLoop:
+    mov ax, [si]
+    cmp ax, [si+2]
+    jl nextStep
+    xchg [si+2], ax
+    mov [si], ax
+nextStep:
+    add si, 2
+    loop innerLoop
+    pop cx
+    loop outerLoop       ; Перехід, якщо не кінець зовнішнього циклу
     ret
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;!!!!!!!
 write_sorted_keys:
     mov si, offset keys_average  ; Початок масиву середніх значень
     mov cx, keys_count            ; Кількість ключів для виведення
