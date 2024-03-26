@@ -1,6 +1,6 @@
 .model small
 .stack 100h
-;запускається код з гітхаба, але лише запускається
+;запускається код з гітхаба
 .data
 src db "Test sentence",0
 lenSrc equ ($ - src)
