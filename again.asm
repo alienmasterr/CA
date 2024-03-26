@@ -22,3 +22,36 @@ key_buffer_ind dw 0
 value_array dw 10000 dup(0)
 number_buffer_ind dw 0
 arrays_num dw 3000 dup(0)
+
+.code
+main proc
+    mov ax, @data
+    mov ds, ax
+
+    ;call check
+    call read_next
+    ;call check
+
+    ; Open the file
+    mov ah, 3Dh         
+    mov al, 0           
+    int 21h             
+ 
+   ; jc file_error      
+    mov [file], ax  
+
+; Read file
+read_next:
+
+    ;call check
+    mov ah, 3Fh         
+    mov bx, [file] 
+    mov cx, 1      ;побайтово
+    mov dx, offset current_char ; store read chars
+    int 21h            
+;call check
+    or ax, ax           ; Check end or error 
+   ; jz file_close       ; ax = 0 -> end of file
+
+main endp
+end main
