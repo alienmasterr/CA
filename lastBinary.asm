@@ -14,7 +14,7 @@ main proc
     call convert_to_binary
 
     ; Print the result
-    mov ah, 09h          ; DOS function to print a string
+    mov ah, 02h          ; DOS function to print a string
     mov dx, offset result_buffer  ; Load the offset of the result buffer
     int 21h              ; Call DOS interrupt
 

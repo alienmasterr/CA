@@ -105,7 +105,7 @@ not_lf:
     cmp current_char, 20h
     jnz not_whitespace
     mov is_word, 0
-    ;call checkKey
+    call check_if_key
     jmp end_char_check
 not_whitespace:
     cmp is_word, 0
@@ -191,6 +191,110 @@ add_0:
     ret
 
 convert_to_binary endp
+
+check_if_key proc
+    mov ax, 0
+    mov bx, 0
+    mov cx, 0
+    mov dx, 0
+
+    cmp new_key_ind, 0
+    jnz search_for_key
+    jmp add_key
+
+search_for_key:
+    mov dx, 0
+
+    check_key:
+        mov si, offset keys_array
+        shl cx, 4
+        add si, cx
+        shr cx, 4
+        add si, dx
+        mov al, [si]
+        mov di, offset single_key_buffer
+        add di, dx
+        mov ah, [di]
+        cmp al, ah
+        jne char_not_same
+
+        mov bx, 1
+        jmp go_to_the_end
+
+    char_not_same:
+        mov bx, 0
+        mov dx, 15
+ go_to_the_end:
+        inc dx
+        cmp dx, 16
+        jnz check_key
+
+    cmp bx, 0
+    jnz found_key
+
+    inc cx
+    cmp cx, new_key_ind
+    jne search_for_key
+
+    ;new key
+    add_key:
+        mov cx, 0
+
+        add_key_loop:
+            mov si, offset single_key_buffer
+            add si, cx
+            mov di, offset keys_array
+            mov ax, new_key_ind
+            shl ax, 4
+            add di, cx
+            add di, ax
+            mov al, [si]
+            mov [di], al
+            inc cx
+            cmp cx, 16
+            jnz add_key_loop
+
+        mov cx, new_key_ind
+        mov current_ind, cx
+        inc new_key_ind
+
+        mov si, offset arrays_num
+        mov cx, current_ind
+        shl cx, 1
+        add si, cx
+        mov ax, 1
+        mov [si], ax
+
+        jmp reached_ending
+    
+
+found_key:
+    mov current_ind, cx
+
+    mov si, offset arrays_num
+    mov cx, current_ind
+    shl cx, 1
+    add si, cx
+    mov ax, [si]
+    inc ax
+    mov [si], ax
+
+reached_ending:
+    mov key_buffer_ind, 0
+    mov cx, 0
+
+    fill_with_0:
+        mov si, offset single_key_buffer
+        add si, cx
+        mov [si], 0
+        inc cx
+        cmp cx, 15
+        jnz fill_with_0
+
+    ret
+check_if_key endp
+
+
 
 
 ; check proc
