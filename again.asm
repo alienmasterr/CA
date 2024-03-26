@@ -462,6 +462,56 @@ for_neg proc
 
 for_neg endp
 
+bubble_sort proc
+    pop dx
+    mov cx, 0
+
+store_pointers_in_array:
+    mov di, offset arrays_num
+    shl cx, 1
+    add di, cx
+    shr cx, 1
+    mov [di], cx
+    inc cx
+    cmp cx, new_key_ind
+    jnz store_pointers_in_array
+    mov cx, word ptr new_key_ind
+    dec cx
+
+outer_loop:
+    push cx
+    lea si, arrays_num
+
+inner_loop:
+    mov ax, [si]
+    push ax
+    shl ax, 1
+    add ax, offset value_array
+    mov di, ax
+    mov ax, [di]
+    mov bx, [si + 2]
+    push bx
+    shl bx, 1
+    add bx, offset value_array
+    mov di, bx
+    mov bx, [di]
+    cmp ax, bx
+    pop bx
+    pop ax
+    jl next_step
+    xchg bx, ax
+    mov [si], ax
+    mov [si + 2], bx
+
+next_step:
+    add si, 2
+    loop inner_loop
+    pop cx
+    loop outer_loop
+    push dx
+    call bubble_sort
+    ret
+bubble_sort endp
 
 ; check proc
 ;     mov ah, 09h
