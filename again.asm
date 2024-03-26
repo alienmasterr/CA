@@ -44,6 +44,10 @@ main proc
 read_next:
 
     ;call check
+    mov ah, 09h
+    mov dx, offset not_fucked
+    int 21h
+
     mov ah, 3Fh         
     mov bx, [file] 
     mov cx, 1      ;побайтово
@@ -54,4 +58,14 @@ read_next:
    ; jz file_close       ; ax = 0 -> end of file
 
 main endp
+
+
+
+; check proc
+;     mov ah, 09h
+;     mov dx, offset not_fucked
+;     int 21h
+; check endp
+
+
 end main
