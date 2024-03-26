@@ -8,7 +8,7 @@ buffer db buffer_size dup(?)  ; Буфер для зберігання зчит�
 key_buffer db 16 dup(?) ; Buffer to hold the key
 value_buffer db 6 dup(?) ; Buffer to hold the value
 
-keys_count equ 10000   ; Максимальна кількість ключів
+keys_count equ 1000   ; Максимальна кількість ключів
 keys db keys_count dup(16 dup(?))  ; Масив для зберігання ключів
 values db keys_count dup(0)        ; Масив для зберігання відповідних значень
 keys_average dw keys_count dup(0)  ; Масив для зберігання середніх значень

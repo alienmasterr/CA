@@ -5,10 +5,9 @@
 MESSAGE DB "enter a num: $"
 MESSAGE1 DB 10, 13, "the num is $"
 .code
-
+;переведення десяткового значення в аскі
 main:
-
-    mov dl, 33
+    mov dl, 100
 
     mov ah, 02h
     int 21h 
