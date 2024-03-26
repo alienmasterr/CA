@@ -46,9 +46,9 @@ read_next:
 
 ;;;;;;;;;;;;;;;;;;;;;;;;
     ;call check
-    mov ah, 09h
-    mov dx, offset not_fucked
-    int 21h
+    ; mov ah, 09h
+    ; mov dx, offset not_fucked
+    ; int 21h
 ;;;;;;;;;;;;;;;;;;;;;;
 
     mov ah, 3Fh         
@@ -91,23 +91,54 @@ main endp
 
 check_each_char proc
 
+;;;;;;;;;;;;;;;;;;;;;;;;
+    ; ;call check
+    ; mov ah, 09h
+    ; mov dx, offset not_fucked
+    ; int 21h
+;;;;;;;;;;;;;;;;;;;;;;
     cmp current_char, 0Dh
-    jnz not_cr
+   
+    jnz not_cr;стрибає
+    
     mov is_word, 1
+
+  
     call convert_to_binary
     jmp end_char_check
 not_cr:
+ 
     cmp current_char, 0Ah
-    jnz not_lf
+    jnz not_lf;стрибає
+    
     mov is_word, 1
     jmp end_char_check
 not_lf:
+;;;;;;;;;;;;;;;;;;;;;;;;
+    ;call check
+    mov ah, 09h
+    mov dx, offset not_fucked
+    int 21h
+;;;;;;;;;;;;;;;;;;;;;;
     cmp current_char, 20h
-    jnz not_whitespace
+    ;;;;;;;;;;;;;;;;;;;;;;;;
+    ;call check
+    mov ah, 09h
+    mov dx, offset not_fucked
+    int 21h
+;;;;;;;;;;;;;;;;;;;;;;
+    jnz not_whitespace;стрибає
+    
     mov is_word, 0
     call check_if_key
     jmp end_char_check
 not_whitespace:
+;;;;;;;;;;;;;;;;;;;;;;;;
+    ;call check
+    mov ah, 09h
+    mov dx, offset not_fucked
+    int 21h
+;;;;;;;;;;;;;;;;;;;;;;
     cmp is_word, 0
     jnz is__word
     mov si, offset number_buffer
@@ -118,6 +149,13 @@ not_whitespace:
     inc number_buffer_ind
     jmp end_char_check
 is__word:
+
+; ;;;;;;;;;;;;;;;;;;;;;;;;
+;     ;call check
+;     mov ah, 09h
+;     mov dx, offset not_fucked
+;     int 21h
+; ;;;;;;;;;;;;;;;;;;;;;;
     mov si, offset single_key_buffer
     mov bx, key_buffer_ind
     add si, bx
@@ -132,10 +170,23 @@ check_each_char endp
 
 
 convert_to_binary proc
+;!!!!!!!!!!!!!!!!!!!!СЮДИ НЕ ЗАХОДИТЬ
+;;;;;;;;;;;;;;;;;;;;;;;;
+    ;call check
+    mov ah, 09h
+    mov dx, offset not_fucked
+    int 21h
+;;;;;;;;;;;;;;;;;;;;;;
     xor bx, bx
     mov cx, 0
 
 calculate:
+;;;;;;;;;;;;;;;;;;;;;;;;
+    ;call check
+    mov ah, 09h
+    mov dx, offset not_fucked
+    int 21h
+;;;;;;;;;;;;;;;;;;;;;;
     mov si, offset number_buffer
     add si, number_buffer_ind
     dec si
