@@ -28,9 +28,9 @@ main proc
     mov ax, @data
     mov ds, ax
 
-    call check
+    ;call check
     call read_next
-    call check
+    ;call check
     ;call printArrays ; Print the arrays
    
     ; Open the file
@@ -45,7 +45,10 @@ main proc
 read_next:
 
 ;;;;;;;;;;;;;;;;;;;;;;;;
-    call check
+    ;call check
+    mov ah, 09h
+    mov dx, offset not_fucked
+    int 21h
 ;;;;;;;;;;;;;;;;;;;;;;
 
     mov ah, 3Fh         
@@ -72,7 +75,7 @@ read_next:
     jmp read_next 
 
 file_close:
-    call check
+    ;call check
     mov ah, 3Eh         
     mov bx, [file] 
     int 21h 
@@ -128,56 +131,56 @@ endProc:
 procChar endp
 
 
-check proc
-    mov ah, 09h
-    mov dx, offset not_fucked
-    int 21h
-check endp
+; check proc
+;     mov ah, 09h
+;     mov dx, offset not_fucked
+;     int 21h
+; check endp
 
 ;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-printArrays proc
-    mov cx, word ptr new_key_ind ; Load the number of keys
+; printArrays proc
+;     mov cx, word ptr new_key_ind ; Load the number of keys
 
-printLoop:
-    ; Print key
-    mov si, offset single_key_buffer
-    mov di, offset keys_array
-    mov bx, word ptr new_key_ind
-    shl bx, 4 ; Multiply by 16 (size of a key)
-    add di, bx ; Point to the current key
-    mov dx, 16 ; Key size
-    call printString
+; printLoop:
+;     ; Print key
+;     mov si, offset single_key_buffer
+;     mov di, offset keys_array
+;     mov bx, word ptr new_key_ind
+;     shl bx, 4 ; Multiply by 16 (size of a key)
+;     add di, bx ; Point to the current key
+;     mov dx, 16 ; Key size
+;     call printString
 
-    ; Print value
-    mov ax, [si] ; Load the value
-    call printNumber
-    call printNewLine
+;     ; Print value
+;     mov ax, [si] ; Load the value
+;     call printNumber
+;     call printNewLine
 
-    ; Move to the next key
-    add si, 16 ; Move to the next key in the buffer
-    loop printLoop
+;     ; Move to the next key
+;     add si, 16 ; Move to the next key in the buffer
+;     loop printLoop
 
-    ret
-printArrays endp
+;     ret
+; printArrays endp
 
-printString proc
-    mov ah, 09h ; Print string
-    int 21h
-    ret
-printString endp
+; printString proc
+;     mov ah, 09h ; Print string
+;     int 21h
+;     ret
+; printString endp
 
-printNumber proc
-    ; Your code to print a number goes here
-    ret
-printNumber endp
+; printNumber proc
+;     ; Your code to print a number goes here
+;     ret
+; printNumber endp
 
-printNewLine proc
-    mov ah, 02h ; Print character
-    mov dl, 0Dh ; Carriage return
-    int 21h
-    mov dl, 0Ah ; Line feed
-    int 21h
-    ret
-printNewLine endp
+; printNewLine proc
+;     mov ah, 02h ; Print character
+;     mov dl, 0Dh ; Carriage return
+;     int 21h
+;     mov dl, 0Ah ; Line feed
+;     int 21h
+;     ret
+; printNewLine endp
 
 end main
