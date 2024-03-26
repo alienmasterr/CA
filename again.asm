@@ -408,23 +408,21 @@ positive:
     shr bx, 1
     push bx
     push dx
-
-
     mov cx, 15
 
 into_char:
     mov dx, 0
     mov bx, 10
     div bx
-    mov si, offset key_buffer
+    mov si, offset single_key_buffer
     add si, cx
     add dx, '0'
     mov [si], dl
     cmp ax, 0
     jnz continue_to_convert
     mov bx, 16
-    mov number_buffer_index, bx
-    sub number_buffer_index, cx
+    mov number_buffer_ind, bx
+    sub number_buffer_ind, cx
     jmp reverse_number
 
 continue_to_convert:
@@ -434,11 +432,11 @@ continue_to_convert:
 
 reverse_number:
     mov cx, 16
-    sub cx, number_buffer_index
+    sub cx, number_buffer_ind
     mov dx, 0
 
 reverse:
-    mov si, offset key_buffer
+    mov si, offset single_key_buffer
     add si, cx
     mov di, offset number_buffer
     add di, dx
@@ -451,6 +449,19 @@ reverse:
 
     ret
 to_char endp
+
+for_neg proc
+    mov bx, cx
+    shl bx, 1
+    mov ax, [value_array + bx]
+    cmp ax, 10000
+    jc positive
+    mov ah, 02h
+    mov dl, '-'
+    int 21h
+
+for_neg endp
+
 
 ; check proc
 ;     mov ah, 09h
