@@ -316,6 +316,141 @@ average_loop:
     ret
 calculate_average endp
 
+println proc
+    mov cx, 0
+
+string_builder:
+    mov ax, 0
+    mov current_ind, ax
+    mov dx, 0
+    push cx
+
+    mov di, offset arrays_num
+    shl cx, 1
+    add di, cx
+    mov cx, [di]
+
+print_keys:
+    mov si, offset keys_array
+    mov ax, cx
+    shl ax, 4
+    add si, ax
+    add si, current_ind
+
+    mov ah, 02h
+    mov bx, dx
+    mov dl, [si]
+    cmp dl, 0
+    jne print_key_loop
+    jmp print_value
+
+print_key_loop:
+    int 21h
+    mov dx, bx
+    inc current_ind
+    inc dx
+    cmp dx, 16
+    jnz print_keys
+
+print_value:
+    mov ah, 02h
+    mov dl, ' '
+    int 21h
+
+    push cx
+    call to_char
+    pop cx
+
+    call for_neg
+    mov dx, 0
+
+value_print:
+    mov si, offset number_buffer
+    add si, dx
+    mov bl, [si]
+
+    mov ah, 02h
+    push dx
+    mov dl, bl
+    int 21h
+    pop dx
+
+    inc dx
+    cmp dx, number_buffer_ind
+    jnz value_print
+
+    mov ah, 02h
+    mov dl, 0dh
+    int 21h
+
+    mov ah, 02h
+    mov dl, 0ah
+    int 21h
+
+    pop cx
+    inc cx
+    cmp cx, new_key_ind
+    jnz string_builder
+
+    ret
+println endp
+
+to_char proc
+    pop dx
+    pop bx
+    shl bx, 1
+    mov ax, [value_array + bx]
+    cmp ax, 10000
+    jc positive
+    neg ax
+
+positive:
+    shr bx, 1
+    push bx
+    push dx
+
+
+    mov cx, 15
+
+into_char:
+    mov dx, 0
+    mov bx, 10
+    div bx
+    mov si, offset key_buffer
+    add si, cx
+    add dx, '0'
+    mov [si], dl
+    cmp ax, 0
+    jnz continue_to_convert
+    mov bx, 16
+    mov number_buffer_index, bx
+    sub number_buffer_index, cx
+    jmp reverse_number
+
+continue_to_convert:
+    dec cx
+    cmp cx, -1
+    jne into_char
+
+reverse_number:
+    mov cx, 16
+    sub cx, number_buffer_index
+    mov dx, 0
+
+reverse:
+    mov si, offset key_buffer
+    add si, cx
+    mov di, offset number_buffer
+    add di, dx
+    mov al, [si]
+    mov [di], al
+    inc dx
+    inc cx
+    cmp cx, 16
+    jnz reverse
+
+    ret
+to_char endp
 
 ; check proc
 ;     mov ah, 09h
