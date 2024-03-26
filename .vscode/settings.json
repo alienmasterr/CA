@@ -11,6 +11,7 @@
 
 
 
+
         
 
 
@@ -22,7 +23,7 @@
             "run": [
                 "TASM ${file}",
                 "TLINK ${filename}",
-                ">${filename} < test.in"
+                ">${filename}"
             ],
             "debug": [
                 "TASM /zi ${file}",
