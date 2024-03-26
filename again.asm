@@ -71,7 +71,6 @@ read_next:
     pop bx
     pop ax
 
-
     jmp read_next 
 
 file_close:
@@ -95,7 +94,7 @@ check_each_char proc
     cmp current_char, 0Dh
     jnz not_cr
     mov is_word, 1
-    ;call trnInNum
+    call convert_to_binary
     jmp end_char_check
 not_cr:
     cmp current_char, 0Ah
@@ -130,6 +129,68 @@ end_char_check:
     ret
 
 check_each_char endp
+
+
+convert_to_binary proc
+    xor bx, bx
+    mov cx, 0
+
+calculate:
+    mov si, offset number_buffer
+    add si, number_buffer_ind
+    dec si
+    sub si, cx
+    xor ax, ax
+    mov al, [si]
+    cmp ax, 45
+    jnz not_minus
+    neg bx
+    jmp end_calculation
+
+not_minus:
+
+    sub al, '0'
+    push cx
+    cmp cx, 0
+    jnz not_0
+    jmp end_multiplication
+
+not_0:
+    multiply_10:
+    mov dx, 10
+    mul dx
+    dec cx
+    cmp cx, 0
+    jnz multiply_10
+
+end_multiplication:
+    pop cx
+    add bx, ax
+    inc cx
+    cmp cx, number_buffer_ind
+    jnz calculate
+
+end_calculation:
+    mov si, offset value_array
+    mov ax, current_ind
+    shl ax, 1
+    add si, ax
+    add bx, [si]
+    mov [si], bx
+    mov number_buffer_ind, 0
+    mov cx, 0
+
+add_0:
+        mov si, offset number_buffer
+        add si, cx
+        mov [si], 0
+        inc cx
+        cmp cx, 9
+        jnz add_0
+
+    ret
+
+convert_to_binary endp
 
 
 ; check proc
