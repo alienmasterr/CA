@@ -294,7 +294,27 @@ reached_ending:
     ret
 check_if_key endp
 
+calculate_average proc
+    mov cx, 0
 
+average_loop:
+    mov si, offset value_array
+    shl cx, 1
+    add si, cx
+    mov di, offset arrays_num
+    add di, cx
+    shr cx, 1
+    mov ax, [si]
+    mov bx, [di]
+    mov dx, 0
+    div bx
+    mov [si], ax
+    inc cx
+    cmp cx, new_key_ind
+    jnz average_loop
+
+    ret
+calculate_average endp
 
 
 ; check proc
