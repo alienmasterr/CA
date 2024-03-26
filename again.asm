@@ -114,31 +114,22 @@ not_cr:
     mov is_word, 1
     jmp end_char_check
 not_lf:
-;;;;;;;;;;;;;;;;;;;;;;;;
-    ;call check
-    mov ah, 09h
-    mov dx, offset not_fucked
-    int 21h
-;;;;;;;;;;;;;;;;;;;;;;
+
     cmp current_char, 20h
-    ;;;;;;;;;;;;;;;;;;;;;;;;
-    ;call check
-    mov ah, 09h
-    mov dx, offset not_fucked
-    int 21h
-;;;;;;;;;;;;;;;;;;;;;;
-    jnz not_whitespace;стрибає
-    
+
+    jnz not_whitespace
+
     mov is_word, 0
     call check_if_key
-    jmp end_char_check
-not_whitespace:
 ;;;;;;;;;;;;;;;;;;;;;;;;
     ;call check
     mov ah, 09h
     mov dx, offset not_fucked
     int 21h
 ;;;;;;;;;;;;;;;;;;;;;;
+    jmp end_char_check ;стрибає
+        
+not_whitespace:
     cmp is_word, 0
     jnz is__word
     mov si, offset number_buffer
