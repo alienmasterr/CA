@@ -13,9 +13,9 @@ lenSrc equ ($ - src)
 dst db "Test sentence",0
 lenDst equ ($ - dst)
 
-keys_count equ 10000   ; Максимальна кількість ключів
+keys_count equ 1000  ; Максимальна кількість ключів
 keys db keys_count dup(16 dup(?))  ; Масив для зберігання ключів
-values db keys_count dup(0)        ; Масив для зберігання відповідних значень
+values db keys_count dup(0)       ; Масив для зберігання відповідних значень
 keys_average dw keys_count dup(0)  ; Масив для зберігання середніх значень
 
 
@@ -42,7 +42,7 @@ parse_input:
 
     ; Код для завантаження адреси масиву значень (values)
     xor dx, dx               ; Обнуляємо старшу частину адреси
-    mov bx, offset values    ; Молодша частина адреси !!!!!!!!!!!!!!!!!!!!!!!
+    mov bx, offset values    ;CONSTANT OVERFLOW Молодша частина адреси !!!!!!!!!!!!!!!!!!!!!!!
 
     ; Тест на переповнення під час додавання
     mov ax, 7FFFh            ; Перше 16-бітне число
@@ -309,11 +309,13 @@ no_values_found:
 
 
 bubble_sort:
-    ;mov si, offset keys_average  ; Початок масиву середніх значень
-    mov ax, seg keys_average      ; Load the segment part of the address into AX
-    lea bx, keys_average   
-    mov si, bx                    ; Move the offset into SI
-    mov ds, ax                    ; Load the segment into the DS register                    
+    mov ax, seg keys_average    ; Load the segment part of the address into AX
+    mov ds, ax                  ; Load the segment into the DS register
+
+    mov bx, offset keys_average ;CONSTANT OVERFLOW Load the offset part of the address into BX
+    mov si, bx                  ; Move the offset into SI                 ; Load the segment into the DS register                    
+    mov cx, keys_count 
+                   ; Load the segment into the DS register                    ; Move the offset into SI                  ; Load the segment into the DS register                    
     mov cx, keys_count            ; Кількість ключів для сортування
 outerLoop:
     push cx
@@ -332,7 +334,7 @@ nextStep:
     ret
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;!!!!!!!
 write_sorted_keys:
-    mov si, offset keys_average  ; Початок масиву середніх значень
+    mov si, offset keys_average  ;CONSTANT OVERFLOW Початок масиву середніх значень
     mov cx, keys_count            ; Кількість ключів для виведення
 write_loop:
     mov ax, [si]          ; Завантаження середнього значення
