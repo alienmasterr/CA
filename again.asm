@@ -16,7 +16,7 @@ keys_array db 10000*16 dup(0) ;розраховано, що усі 10000 ряд�
 single_key_buffer db 16 dup(0) ; максимальний розмір одного ключа
 number_buffer db 16 dup(0)
 
-isWord db 1
+is_word db 1
 
 key_buffer_ind dw 0
 value_array dw 10000 dup(0)
@@ -65,7 +65,7 @@ read_next:
     push bx
     push cx
     push dx
-    call procChar
+    call check_each_char
     pop dx
     pop cx
     pop bx
@@ -88,47 +88,48 @@ ending:
     int 21h             ; Call DOS interrupt
     ret
  
-
 main endp
 
-procChar proc
+check_each_char proc
 
     cmp current_char, 0Dh
-    jnz notCR
-    mov isWord, 1
+    jnz not_cr
+    mov is_word, 1
     ;call trnInNum
-    jmp endProc
-notCR:
+    jmp end_char_check
+not_cr:
     cmp current_char, 0Ah
-    jnz notLF
-    mov isWord, 1
-    jmp endProc
-notLF:
+    jnz not_lf
+    mov is_word, 1
+    jmp end_char_check
+not_lf:
     cmp current_char, 20h
-    jnz notSpace
-    mov isWord, 0
+    jnz not_whitespace
+    mov is_word, 0
     ;call checkKey
-    jmp endProc
-notSpace:
-    cmp isWord, 0
-    jnz itsWord
+    jmp end_char_check
+not_whitespace:
+    cmp is_word, 0
+    jnz is__word
     mov si, offset number_buffer
     mov bx, number_buffer_ind
     add si, bx
     mov al, current_char
     mov [si], al
     inc number_buffer_ind
-    jmp endProc
-itsWord:
+    jmp end_char_check
+is__word:
     mov si, offset single_key_buffer
     mov bx, key_buffer_ind
     add si, bx
     mov al, current_char
     mov [si], al
     inc key_buffer_ind
-endProc:
+
+end_char_check:
     ret
-procChar endp
+
+check_each_char endp
 
 
 ; check proc
