@@ -40,7 +40,7 @@ printLoop:
     mov ax, 4c00h
     int 21h
 _main endp
-
+;!
 print_word proc
     push bx
     mov bx, 10
@@ -58,7 +58,7 @@ no_more_digits:
     pop bx
     ret
 print_word endp
-
+;!
 main:
     mov ax, @data
     mov ds, ax

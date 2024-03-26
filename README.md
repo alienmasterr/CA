@@ -1,5 +1,5 @@
 # CA
-Alina Kharchenko ІПЗ-4
+Alina Kharchenko ІПЗ-4(гр)
 3 варіант
 
 Постановка задачі
