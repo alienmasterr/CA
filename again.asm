@@ -16,7 +16,7 @@ keys_array db 10000*16 dup(0) ;розраховано, що усі 10000 ряд�
 single_key_buffer db 16 dup(0) ; максимальний розмір одного ключа
 number_buffer db 16 dup(0)
 
-is_word db 1
+is_key db 1 ;????????????????????????????????? 1
 
 key_buffer_ind dw 0
 value_array dw 10000 dup(0)
@@ -57,7 +57,7 @@ read_next:
     mov dx, offset current_char ; store read chars
     int 21h            
 
-    or ax, ax           ; Check end or error 
+    or ax, ax           ; Check end
     jz file_close       ; ax = 0 -> end of file
 
      ; Process the character
@@ -97,21 +97,27 @@ check_each_char proc
     ; mov dx, offset not_fucked
     ; int 21h
 ;;;;;;;;;;;;;;;;;;;;;;
-    cmp current_char, 0Dh
+    cmp current_char, 0Dh ;compares the current character with carriage return (CR, 0Dh). If they are not equal, it jumps to not_cr.
    
     jnz not_cr;стрибає
     
-    mov is_word, 1
-
+    mov is_key, 1 ;If the current character is not a carriage return, it sets the flag is_key to 1, indicating that it's part of a word.
+ ;;;;;;;;;;;;;;;;;;;;;;;;
+    ;call check
+    mov ah, 09h
+    mov dx, offset not_fucked
+    int 21h
+;;;;;;;;;;;;;;;;;;;;;; 
   
     call convert_to_binary
+
     jmp end_char_check
 not_cr:
  
     cmp current_char, 0Ah
     jnz not_lf;стрибає
     
-    mov is_word, 1
+    mov is_key, 1
     jmp end_char_check
 not_lf:
 
@@ -119,19 +125,15 @@ not_lf:
 
     jnz not_whitespace
 
-    mov is_word, 0
+    mov is_key, 0
     call check_if_key
-;;;;;;;;;;;;;;;;;;;;;;;;
-    ;call check
-    mov ah, 09h
-    mov dx, offset not_fucked
-    int 21h
-;;;;;;;;;;;;;;;;;;;;;;
+
     jmp end_char_check ;стрибає
         
 not_whitespace:
-    cmp is_word, 0
-    jnz is__word
+    cmp is_key, 0
+    jnz is_word
+    call convert_to_binary;;;;;;;;;;----- тепер воно зайшло в конверт ту байнврі, але не факт що правильно
     mov si, offset number_buffer
     mov bx, number_buffer_ind
     add si, bx
@@ -139,7 +141,7 @@ not_whitespace:
     mov [si], al
     inc number_buffer_ind
     jmp end_char_check
-is__word:
+is_word:
 
 ; ;;;;;;;;;;;;;;;;;;;;;;;;
 ;     ;call check
@@ -162,22 +164,17 @@ check_each_char endp
 
 convert_to_binary proc
 ;!!!!!!!!!!!!!!!!!!!!СЮДИ НЕ ЗАХОДИТЬ
-;;;;;;;;;;;;;;;;;;;;;;;;
+ ;;;;;;;;;;;;;;;;;;;;;;;;
     ;call check
     mov ah, 09h
     mov dx, offset not_fucked
     int 21h
-;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;; 
     xor bx, bx
     mov cx, 0
 
 calculate:
-;;;;;;;;;;;;;;;;;;;;;;;;
-    ;call check
-    mov ah, 09h
-    mov dx, offset not_fucked
-    int 21h
-;;;;;;;;;;;;;;;;;;;;;;
+
     mov si, offset number_buffer
     add si, number_buffer_ind
     dec si
@@ -235,14 +232,19 @@ add_0:
 convert_to_binary endp
 
 check_if_key proc
+
+
+
     mov ax, 0
     mov bx, 0
     mov cx, 0
     mov dx, 0
 
     cmp new_key_ind, 0
+
     jnz search_for_key
-    jmp add_key
+
+    jmp add_key ;стрибає
 
 search_for_key:
     mov dx, 0
@@ -280,9 +282,11 @@ search_for_key:
 
     ;new key
     add_key:
+
         mov cx, 0
 
         add_key_loop:
+
             mov si, offset single_key_buffer
             add si, cx
             mov di, offset keys_array
@@ -294,8 +298,9 @@ search_for_key:
             mov [di], al
             inc cx
             cmp cx, 16
+      
             jnz add_key_loop
-
+       
         mov cx, new_key_ind
         mov current_ind, cx
         inc new_key_ind
@@ -307,8 +312,8 @@ search_for_key:
         mov ax, 1
         mov [si], ax
 
-        jmp reached_ending
-    
+        jmp reached_ending;стрибає
+                 
 
 found_key:
     mov current_ind, cx
@@ -322,6 +327,7 @@ found_key:
     mov [si], ax
 
 reached_ending:
+
     mov key_buffer_ind, 0
     mov cx, 0
 
@@ -332,8 +338,9 @@ reached_ending:
         inc cx
         cmp cx, 15
         jnz fill_with_0
-
     ret
+
+;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 check_if_key endp
 
 calculate_average proc
