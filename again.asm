@@ -16,7 +16,7 @@ keys_array db 10000*16 dup(0) ;розраховано, що усі 10000 ряд�
 single_key_buffer db 16 dup(0) ; максимальний розмір одного ключа
 number_buffer db 16 dup(0)
 
-is_key db 1 ;????????????????????????????????? 1
+is_key db 1 ;флаг на 1
 
 key_buffer_ind dw 0
 value_array dw 10000 dup(0)
@@ -133,13 +133,21 @@ not_lf:
 not_whitespace:
     cmp is_key, 0
     jnz is_word
-    call convert_to_binary;;;;;;;;;;----- тепер воно зайшло в конверт ту байнврі, але не факт що правильно
+    
+
+
     mov si, offset number_buffer
+
     mov bx, number_buffer_ind
     add si, bx
     mov al, current_char
     mov [si], al
     inc number_buffer_ind
+
+    call convert_to_binary;;;;;;;;;;----- тепер воно зайшло в конверт ту байнврі
+
+
+
     jmp end_char_check
 is_word:
 
@@ -163,13 +171,7 @@ check_each_char endp
 
 
 convert_to_binary proc
-;!!!!!!!!!!!!!!!!!!!!СЮДИ НЕ ЗАХОДИТЬ
- ;;;;;;;;;;;;;;;;;;;;;;;;
-    ;call check
-    mov ah, 09h
-    mov dx, offset not_fucked
-    int 21h
-;;;;;;;;;;;;;;;;;;;;;; 
+ 
     xor bx, bx
     mov cx, 0
 
@@ -182,7 +184,9 @@ calculate:
     xor ax, ax
     mov al, [si]
     cmp ax, 45
+    
     jnz not_minus
+    
     neg bx
     jmp end_calculation
 
@@ -192,6 +196,7 @@ not_minus:
     push cx
     cmp cx, 0
     jnz not_0
+
     jmp end_multiplication
 
 not_0:
@@ -203,6 +208,7 @@ not_0:
     jnz multiply_10
 
 end_multiplication:
+
     pop cx
     add bx, ax
     inc cx
@@ -210,6 +216,7 @@ end_multiplication:
     jnz calculate
 
 end_calculation:
+
     mov si, offset value_array
     mov ax, current_ind
     shl ax, 1
@@ -220,6 +227,7 @@ end_calculation:
     mov cx, 0
 
 add_0:
+
         mov si, offset number_buffer
         add si, cx
         mov [si], 0
@@ -233,8 +241,6 @@ convert_to_binary endp
 
 check_if_key proc
 
-
-
     mov ax, 0
     mov bx, 0
     mov cx, 0
@@ -242,11 +248,17 @@ check_if_key proc
 
     cmp new_key_ind, 0
 
-    jnz search_for_key
-
+    jnz key_compare
+;;;;;;;;;;;;;;;;;;;;;;;;
+    ;call check
+    mov ah, 09h
+    mov dx, offset not_fucked
+    int 21h
+;;;;;;;;;;;;;;;;;;;;;; 
     jmp add_key ;стрибає
 
-search_for_key:
+key_compare:
+;НЕ ЗАЙШЛО і добре на 1 ключі
     mov dx, 0
 
     check_key:
@@ -278,7 +290,7 @@ search_for_key:
 
     inc cx
     cmp cx, new_key_ind
-    jne search_for_key
+    jne key_compare
 
     ;new key
     add_key:
