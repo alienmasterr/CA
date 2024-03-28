@@ -2,10 +2,10 @@
 .stack 100h
 .data
 
-not_fucked db "f $", 0Dh, 0Ah
+not_bad db "f $", 0Dh, 0Ah
 is_check_called db 0 ; Флаг, що позначає, чи була вже викликана процедура check
 
-file dw 0
+file dw 0 ;змінна для зберігання відкритого файл
 char_buffer db 0
 current_ind dw 0
 new_key_ind dw 0
@@ -57,38 +57,6 @@ ending:
     ret
 main endp
 
-; main proc
-;     mov ax, @data
-;     mov ds, ax
-   
-; mov si, offset number_buffer
-;         dec number_buffer_ind
-;         add si, number_buffer_ind
-;         mov [si], 0
-
-
-;     ; Open the file
-;     mov ah, 3Dh         
-;     mov al, 0           
-;     int 21h             
-      
-;     mov [file], ax
-;     call read_next
-    
-;     ;не заходить
-; ;  ;;;;;;;;;;;;;;;;;;;;;;;
-; ;     ;call check
-;      mov ah, 09h
-;      mov dx, offset not_fucked
-;      int 21h
-; ; ;;;;;;;;;;;;;;;;;;;;;;
-; call convert_to_binary
-; call calculate_average
-; call bubble_sort
-; call println
-
-
-; main endp
 ;Read file
 read_next proc
 init_read_line_chars:
@@ -96,54 +64,35 @@ init_read_line_chars:
 
 read_char_loop:
 
-    push bx;     mov bx, word ptr new_key_ind
-    push cx
     mov dx, offset char_buffer
-
     mov ah, 3Fh         
-    mov bx, 0 ;[file] 
-    mov cx, 1      ;побайтово
-    ;mov dx, offset char_buffer ; store read chars
+    mov bx, [file]
+    mov cx, 1      
     int 21h            
 
-    pop cx
-    pop bx
-
-    or ax, ax           ; Check end
-    jz file_close       ; ax = 0 -> end of file
+    or ax, ax           
+    jz file_close       
 
     mov al, [char_buffer]
 
-     ; Process the character
     push ax
     push bx
     push cx
     push dx
     call check_each_char
- pop dx
+pop dx
 pop cx
 pop bx
 pop ax
     or ax, ax   
+    jnz read_char_loop 
 
-    jnz read_next 
-
-   
 file_close:
-    ;call check
     mov ah, 3Eh         
-    mov bx, 0 ;[file] 
+    mov bx, [file] 
     int 21h 
 
     jmp ending
-
-
-; ending:
-;     mov ah, 4Ch         ; DOS function to exit the program
-;     int 21h             ; Call DOS interrupt
-;     ret
- 
-;main endp
 read_next ENDP
 
 check_each_char proc
@@ -361,12 +310,9 @@ found_key:
 check_key_existance endp
 
 calculate_average proc
-; заходить
     mov cx, 0
 
 average_loop:
-; заходить
- 
     mov si, offset value_array
     shl cx, 1
     add si, cx
@@ -392,7 +338,7 @@ check proc
     je end_check           ; Якщо так, просто завершуємо процедуру
 
     mov ah, 09h
-    mov dx, offset not_fucked
+    mov dx, offset not_bad
     int 21h
 
     mov is_check_called, 1 ; Встановлюємо флаг, позначаючи, що процедура вже була викликана
@@ -403,7 +349,6 @@ mov is_check_called, 0
 check endp
 ;;;;;;;;;;;;;;;;;;;;;;
 println proc
-;call check
     mov cx, 0
 
 string_builder:
@@ -424,53 +369,34 @@ print_keys:
     add si, ax
     add si, current_ind
 
-    mov ah, 02h
-    mov bx, dx
-    mov dl, [si]
-    cmp dl, 0
-  
-    jne print_key_loop;не стрибає
-      ;+   
-    jmp print_value
-
-print_key_loop:
-;не заходить
+    mov ah, 09h
+    mov dx, si
     int 21h
-    mov dx, bx
-    inc current_ind
-    inc dx
-    cmp dx, 16
-    jnz print_keys
-
-print_value:
-;+
 
     mov ah, 02h
     mov dl, ' '
     int 21h
+
     push cx
-    ;+
     call to_char
     pop cx
- ;+
+
     call for_neg
+
     mov dx, 0
 
-value_print:
-;-
+print_value:
     mov si, offset number_buffer
     add si, dx
     mov bl, [si]
 
     mov ah, 02h
-    push dx
     mov dl, bl
     int 21h
-    pop dx
 
     inc dx
     cmp dx, number_buffer_ind
-    jnz value_print
+    jnz print_value
 
     mov ah, 02h
     mov dl, 0dh
@@ -487,6 +413,50 @@ value_print:
 
     ret
 println endp
+
+; println proc
+;     mov cx, 0
+
+; string_builder:
+;     mov ax, 0
+;     mov current_ind, ax
+;     mov dx, 0
+;     push cx
+
+;     mov di, offset arrays_num
+;     shl cx, 1
+;     add di, cx
+;     mov cx, [di]
+
+; print_keys:
+;     mov si, offset keys_array
+;     mov ax, cx
+;     shl ax, 4
+;     add si, ax
+;     add si, current_ind
+
+;     mov ah, 09h          ; Вивести рядок на екран
+;     mov dx, si
+;     int 21h
+
+;     mov ah, 02h          ; Вивести пробіл між ключами та значеннями
+;     mov dl, ' '
+;     int 21h
+
+;     call to_char         ; Вивести значення
+
+;     mov dl, 0dh          ; Перехід на новий рядок
+;     int 21h
+
+;     mov dl, 0ah
+;     int 21h
+
+;     inc cx
+;     cmp cx, new_key_ind
+;     jnz string_builder
+
+;     ret
+; println endp
 
 to_char proc
 ;+
@@ -532,7 +502,7 @@ continue_to_convert:
 
 reverse_number:
    ;call check ;!!!!!!!!!!
-;WTF!!!!!!!!!!!!!!!!!????????????
+;!!!!!!!!!!!!!!!!????????????
     mov cx, 16
     sub cx, number_buffer_ind
     mov dx, 0

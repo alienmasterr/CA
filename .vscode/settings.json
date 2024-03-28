@@ -1,7 +1,8 @@
 {
     "masmtasm.ASM.mode": "workspace",
-    "masmtasm.ASM.emulator": "jsdos",
+    "masmtasm.ASM.emulator": "dosbox-x",
     "masmtasm.ASM.actions": {
+
 
 
         
@@ -27,7 +28,7 @@
             "run": [
                 "TASM ${file}",
                 "TLINK ${filename}",
-                ">${filename} < test.in"
+                ">V3TEST ${filename}"
             ],
             "debug": [
                 "TASM /zi ${file}",
