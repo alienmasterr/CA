@@ -3,6 +3,7 @@
 .data
 
 not_fucked db "f $", 0Dh, 0Ah
+is_check_called db 0 ; Флаг, що позначає, чи була вже викликана процедура check
 
 file dw 0
 char_buffer db 0
@@ -361,22 +362,11 @@ check_key_existance endp
 
 calculate_average proc
 ; заходить
- ;;;;;;;;;;;;;;;;;;;;;;;
-    ;call check
-     mov ah, 09h
-     mov dx, offset not_fucked
-     int 21h
-;;;;;;;;;;;;;;;;;;;;;;
     mov cx, 0
 
 average_loop:
 ; заходить
- ;;;;;;;;;;;;;;;;;;;;;;;
-    ;call check
-     mov ah, 09h
-     mov dx, offset not_fucked
-     int 21h
-;;;;;;;;;;;;;;;;;;;;;;
+ 
     mov si, offset value_array
     shl cx, 1
     add si, cx
@@ -391,10 +381,29 @@ average_loop:
     inc cx
     cmp cx, new_key_ind
     jnz average_loop
+
+    call println
     ret
 calculate_average endp
+;заходить
+;;;;;;;;;;;;;;;;;;;;;;;
+check proc
+    cmp is_check_called, 1 ; Перевіряємо, чи вже була викликана процедура check
+    je end_check           ; Якщо так, просто завершуємо процедуру
 
+    mov ah, 09h
+    mov dx, offset not_fucked
+    int 21h
+
+    mov is_check_called, 1 ; Встановлюємо флаг, позначаючи, що процедура вже була викликана
+
+end_check:
+mov is_check_called, 0
+    ret
+check endp
+;;;;;;;;;;;;;;;;;;;;;;
 println proc
+;call check
     mov cx, 0
 
 string_builder:
@@ -419,10 +428,13 @@ print_keys:
     mov bx, dx
     mov dl, [si]
     cmp dl, 0
-    jne print_key_loop
+  
+    jne print_key_loop;не стрибає
+      ;+   
     jmp print_value
 
 print_key_loop:
+;не заходить
     int 21h
     mov dx, bx
     inc current_ind
@@ -431,18 +443,21 @@ print_key_loop:
     jnz print_keys
 
 print_value:
+;+
+
     mov ah, 02h
     mov dl, ' '
     int 21h
-
     push cx
+    ;+
     call to_char
     pop cx
-
+ ;+
     call for_neg
     mov dx, 0
 
 value_print:
+;-
     mov si, offset number_buffer
     add si, dx
     mov bl, [si]
@@ -474,6 +489,7 @@ value_print:
 println endp
 
 to_char proc
+;+
     pop dx
     pop bx
     shl bx, 1
@@ -489,6 +505,8 @@ positive:
     mov cx, 15
 
 into_char:
+;+
+
     mov dx, 0
     mov bx, 10
     div bx
@@ -497,18 +515,24 @@ into_char:
     add dx, '0'
     mov [si], dl
     cmp ax, 0
+    ;-
     jnz continue_to_convert
     mov bx, 16
     mov number_buffer_ind, bx
     sub number_buffer_ind, cx
+ ;+
     jmp reverse_number
 
 continue_to_convert:
+;-
+   
     dec cx
     cmp cx, -1
     jne into_char
 
 reverse_number:
+   ;call check ;!!!!!!!!!!
+;WTF!!!!!!!!!!!!!!!!!????????????
     mov cx, 16
     sub cx, number_buffer_ind
     mov dx, 0
@@ -529,6 +553,7 @@ reverse:
 to_char endp
 
 for_neg proc
+
     mov bx, cx
     shl bx, 1
     mov ax, [value_array + bx]
