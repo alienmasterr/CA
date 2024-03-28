@@ -260,30 +260,54 @@ check_key_existance proc
     mov bx, 0
     mov cx, 0
     mov dx, 0
+
+
+
+    ; Заповнення масиву single_key_buffer нулями
+    mov cx, 15
+    mov si, offset single_key_buffer
+fill_with_0:
+    mov [si], 0
+    inc si
+    loop fill_with_0
+
+
+; Перевірка наявності нових ключів
+   
 ; ;;;;;;;;;;;;;;;;;;;;;;;
 ;     ;call check
 ;      mov ah, 09h
 ;      mov dx, offset not_fucked
 ;      int 21h
 ; ;;;;;;;;;;;;;;;;;;;;;
-    cmp new_key_ind, 0
+    cmp new_key_ind, 0 ;Check if new_key_ind is zero: It checks if new_key_ind is zero.
+                        ;If it's zero, it implies that there are no existing keys in the keys_array,
+                        ;and the procedure jumps to the add_key label to add the new key.
+
 ; ;;;;;;;;;;;;;;;;;;;;;;;
 ;     ;call check
 ;      mov ah, 09h
 ;      mov dx, offset not_fucked
 ;      int 21h
 ; ;;;;;;;;;;;;;;;;;;;;;
-    jnz key_compare
-;;;;;;;;;;;;;;;;;;;;;;;
-    ;;call check
-    mov ah, 09h
-    mov dx, offset not_fucked
-    int 21h
-;;;;;;;;;;;;;;;;;;;;; 
+
+    jnz key_compare ;If new_key_ind is not zero, it enters a loop labeled key_compare
+                    ;to compare the new key stored in single_key_buffer with the keys in the keys_array.
+
+   ; ret   ;??????????     
+
+; ;;;;;;;;;;;;;;;;;;;;;;;
+;     ;;call check
+;     mov ah, 09h
+;     mov dx, offset not_fucked
+;     int 21h
+; ;;;;;;;;;;;;;;;;;;;;; 
+
     jmp add_key ;стрибає
 
-key_compare:
-;НЕ ЗАЙШЛО і добре на 1 ключі
+key_compare: ;The loop iterates through each key in the array, comparing each character
+             ;of the current key with the characters of the keys in the array.
+;заходить
 ;;;;;;;;;;;;;;;;;;;;;;;
     ;call check
      mov ah, 09h
@@ -324,12 +348,18 @@ key_compare:
     jne key_compare
 
     ;new key
-    add_key:
+add_key:
+    ;заходить
+; ;;;;;;;;;;;;;;;;;;;;;;;
+;     ;call check
+;      mov ah, 09h
+;      mov dx, offset not_fucked
+;      int 21h
+; ;;;;;;;;;;;;;;;;;;;;;
+    mov cx, 0
 
-        mov cx, 0
-
-        add_key_loop:
-
+    add_key_loop:
+        ;добре
             mov si, offset single_key_buffer
             add si, cx
             mov di, offset keys_array
@@ -343,24 +373,22 @@ key_compare:
             cmp cx, 16
       
             jnz add_key_loop
-       
+
         mov cx, new_key_ind
         mov current_ind, cx
-        inc new_key_ind
-
+               ;;;;;;;;;;;;;;;;;;;;;;;
+    
+        inc new_key_ind ;інкризить
         mov si, offset arrays_num
         mov cx, current_ind
         shl cx, 1
         add si, cx
         mov ax, 1
         mov [si], ax
-
-        jmp reached_ending;стрибає
-                 
-
+        ;jmp reached_ending;стрибає
+        jmp check_key_existance
 found_key:
     mov current_ind, cx
-
     mov si, offset arrays_num
     mov cx, current_ind
     shl cx, 1
@@ -369,18 +397,22 @@ found_key:
     inc ax
     mov [si], ax
 
-reached_ending:
-
-    mov key_buffer_ind, 0
-    mov cx, 0
-
-    fill_with_0:
-        mov si, offset single_key_buffer
-        add si, cx
-        mov [si], 0
-        inc cx
-        cmp cx, 15
-        jnz fill_with_0
+; reached_ending:
+;        ;приходить сюди і назад вже не повертається,
+;        ;заповнює пустоту нулями
+;     mov key_buffer_ind, 0
+;     mov cx, 0
+;     fill_with_0:
+;         mov si, offset single_key_buffer
+;         add si, cx
+;         mov [si], 0
+;         inc cx
+;         cmp cx, 15
+;         jnz fill_with_0
+;     ; Перевірка наявності нових ключів
+;     ;звідси йде нескінченний цикл
+;     ; cmp new_key_ind, 0
+;     ; jnz key_compare ; Якщо new_key_ind не нульовий, виконуємо порівняння ключів
     ret
 
 ;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
