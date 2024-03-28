@@ -8,7 +8,7 @@
 not_fucked db "f $", 0Dh, 0Ah
 
 file dw 0
-current_char db 0
+char_buffer db 0
 current_ind dw 0
 new_key_ind dw 0
 
@@ -48,9 +48,9 @@ init_read_line_chars:
     xor cx, cx
 ;;;;;;;;;;;;;;;;;;;;;;;;
     ;call check
-     mov ah, 09h
-     mov dx, offset not_fucked
-     int 21h
+    ;  mov ah, 09h
+    ;  mov dx, offset not_fucked
+    ;  int 21h
 ;;;;;;;;;;;;;;;;;;;;;;
 read_char_loop:
     ;cmp cx, lineLength-1
@@ -58,12 +58,12 @@ read_char_loop:
 
     push bx;     mov bx, word ptr new_key_ind
     push cx
-    mov dx, offset current_char
+    mov dx, offset char_buffer
 
     mov ah, 3Fh         
     mov bx, 0 ;[file] 
     mov cx, 1      ;побайтово
-    ;mov dx, offset current_char ; store read chars
+    ;mov dx, offset char_buffer ; store read chars
     int 21h            
 
     pop cx
@@ -72,7 +72,7 @@ read_char_loop:
     or ax, ax           ; Check end
     jz file_close       ; ax = 0 -> end of file
 
-    mov al, [current_char]
+    mov al, [char_buffer]
 
      ; Process the character
     push ax
@@ -91,7 +91,7 @@ read_char_loop:
 file_close:
     ;call check
     mov ah, 3Eh         
-    mov bx, [file] 
+    mov bx, 0 ;[file] 
     int 21h 
 
     jmp ending
@@ -113,7 +113,7 @@ check_each_char proc
     ; mov dx, offset not_fucked
     ; int 21h
 ;;;;;;;;;;;;;;;;;;;;;;
-    cmp current_char, 0Dh ;compares the current character with carriage return (CR, 0Dh). If they are not equal, it jumps to not_cr.
+    cmp char_buffer, 0Dh ;compares the current character with carriage return (CR, 0Dh). If they are not equal, it jumps to not_cr.
    
     jnz not_cr;стрибає
     
@@ -130,19 +130,19 @@ check_each_char proc
     jmp end_char_check
 not_cr:
  
-    cmp current_char, 0Ah
+    cmp char_buffer, 0Ah
     jnz not_lf;стрибає
     
     mov is_key, 1
     jmp end_char_check
 not_lf:
 
-    cmp current_char, 20h
+    cmp char_buffer, 20h
 
     jnz not_whitespace
 
     mov is_key, 0
-    call check_if_key
+    call check_key_existance
 
     jmp end_char_check ;стрибає
         
@@ -156,7 +156,7 @@ not_whitespace:
 
     mov bx, number_buffer_ind
     add si, bx
-    mov al, current_char
+    mov al, char_buffer
     mov [si], al
     inc number_buffer_ind
 
@@ -176,7 +176,7 @@ is_word:
     mov si, offset single_key_buffer
     mov bx, key_buffer_ind
     add si, bx
-    mov al, current_char
+    mov al, char_buffer
     mov [si], al
     inc key_buffer_ind
 
@@ -255,26 +255,41 @@ add_0:
 
 convert_to_binary endp
 
-check_if_key proc
-
+check_key_existance proc
     mov ax, 0
     mov bx, 0
     mov cx, 0
     mov dx, 0
-
+; ;;;;;;;;;;;;;;;;;;;;;;;
+;     ;call check
+;      mov ah, 09h
+;      mov dx, offset not_fucked
+;      int 21h
+; ;;;;;;;;;;;;;;;;;;;;;
     cmp new_key_ind, 0
-
+; ;;;;;;;;;;;;;;;;;;;;;;;
+;     ;call check
+;      mov ah, 09h
+;      mov dx, offset not_fucked
+;      int 21h
+; ;;;;;;;;;;;;;;;;;;;;;
     jnz key_compare
-;;;;;;;;;;;;;;;;;;;;;;;;
-    ;call check
-    ; mov ah, 09h
-    ; mov dx, offset not_fucked
-    ; int 21h
-;;;;;;;;;;;;;;;;;;;;;; 
+;;;;;;;;;;;;;;;;;;;;;;;
+    ;;call check
+    mov ah, 09h
+    mov dx, offset not_fucked
+    int 21h
+;;;;;;;;;;;;;;;;;;;;; 
     jmp add_key ;стрибає
 
 key_compare:
 ;НЕ ЗАЙШЛО і добре на 1 ключі
+;;;;;;;;;;;;;;;;;;;;;;;
+    ;call check
+     mov ah, 09h
+     mov dx, offset not_fucked
+     int 21h
+;;;;;;;;;;;;;;;;;;;;;
     mov dx, 0
 
     check_key:
@@ -369,7 +384,7 @@ reached_ending:
     ret
 
 ;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-check_if_key endp
+check_key_existance endp
 
 calculate_average proc
     mov cx, 0
