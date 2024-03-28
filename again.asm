@@ -39,26 +39,40 @@ main proc
     int 21h             
  
    ; jc file_error      
-    mov [file], ax  
+    mov [file], ax 
 
+main endp
 ; Read file
-read_next:
-
+read_next proc
+init_read_line_chars:
+    xor cx, cx
 ;;;;;;;;;;;;;;;;;;;;;;;;
     ;call check
-    ; mov ah, 09h
-    ; mov dx, offset not_fucked
-    ; int 21h
+     mov ah, 09h
+     mov dx, offset not_fucked
+     int 21h
 ;;;;;;;;;;;;;;;;;;;;;;
+read_char_loop:
+    ;cmp cx, lineLength-1
+    ;jae end_read_line_chars
+
+    push bx;     mov bx, word ptr new_key_ind
+    push cx
+    mov dx, offset current_char
 
     mov ah, 3Fh         
-    mov bx, [file] 
+    mov bx, 0 ;[file] 
     mov cx, 1      ;побайтово
-    mov dx, offset current_char ; store read chars
+    ;mov dx, offset current_char ; store read chars
     int 21h            
+
+    pop cx
+    pop bx
 
     or ax, ax           ; Check end
     jz file_close       ; ax = 0 -> end of file
+
+    mov al, [current_char]
 
      ; Process the character
     push ax
@@ -72,6 +86,7 @@ read_next:
     pop ax
 
     jmp read_next 
+
 
 file_close:
     ;call check
@@ -87,7 +102,8 @@ ending:
     int 21h             ; Call DOS interrupt
     ret
  
-main endp
+;main endp
+read_next ENDP
 
 check_each_char proc
 
@@ -104,9 +120,9 @@ check_each_char proc
     mov is_key, 1 ;If the current character is not a carriage return, it sets the flag is_key to 1, indicating that it's part of a word.
  ;;;;;;;;;;;;;;;;;;;;;;;;
     ;call check
-    mov ah, 09h
-    mov dx, offset not_fucked
-    int 21h
+    ; mov ah, 09h
+    ; mov dx, offset not_fucked
+    ; int 21h
 ;;;;;;;;;;;;;;;;;;;;;; 
   
     call convert_to_binary
@@ -251,9 +267,9 @@ check_if_key proc
     jnz key_compare
 ;;;;;;;;;;;;;;;;;;;;;;;;
     ;call check
-    mov ah, 09h
-    mov dx, offset not_fucked
-    int 21h
+    ; mov ah, 09h
+    ; mov dx, offset not_fucked
+    ; int 21h
 ;;;;;;;;;;;;;;;;;;;;;; 
     jmp add_key ;стрибає
 
