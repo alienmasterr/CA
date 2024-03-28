@@ -1,10 +1,7 @@
 .model small
 .stack 100h
-
-
 .data
 
-;file_error_message db "error $"
 not_fucked db "f $", 0Dh, 0Ah
 
 file dw 0
@@ -27,34 +24,76 @@ arrays_num dw 3000 dup(0)
 main proc
     mov ax, @data
     mov ds, ax
-
-    ;call check
-    call read_next
-    ;call check
-    ;call printArrays ; Print the arrays
    
+    mov si, offset number_buffer
+    dec number_buffer_ind
+    add si, number_buffer_ind
+    mov [si], 0
+
     ; Open the file
     mov ah, 3Dh         
     mov al, 0           
     int 21h             
- 
-   ; jc file_error      
-    mov [file], ax 
+      
+    mov [file], ax
+    call read_next
+    
+    call calculate_average  ; Call calculate_average here
+    
+    call bubble_sort
+    call println
 
+    ; Close the file
+    mov ah, 3Eh         
+    mov bx, [file] 
+    int 21h 
+
+    jmp ending
+
+ending:
+    mov ah, 4Ch         ; DOS function to exit the program
+    int 21h             ; Call DOS interrupt
+    ret
 main endp
-; Read file
+
+; main proc
+;     mov ax, @data
+;     mov ds, ax
+   
+; mov si, offset number_buffer
+;         dec number_buffer_ind
+;         add si, number_buffer_ind
+;         mov [si], 0
+
+
+;     ; Open the file
+;     mov ah, 3Dh         
+;     mov al, 0           
+;     int 21h             
+      
+;     mov [file], ax
+;     call read_next
+    
+;     ;не заходить
+; ;  ;;;;;;;;;;;;;;;;;;;;;;;
+; ;     ;call check
+;      mov ah, 09h
+;      mov dx, offset not_fucked
+;      int 21h
+; ; ;;;;;;;;;;;;;;;;;;;;;;
+; call convert_to_binary
+; call calculate_average
+; call bubble_sort
+; call println
+
+
+; main endp
+;Read file
 read_next proc
 init_read_line_chars:
     xor cx, cx
-;;;;;;;;;;;;;;;;;;;;;;;;
-    ;call check
-    ;  mov ah, 09h
-    ;  mov dx, offset not_fucked
-    ;  int 21h
-;;;;;;;;;;;;;;;;;;;;;;
+
 read_char_loop:
-    ;cmp cx, lineLength-1
-    ;jae end_read_line_chars
 
     push bx;     mov bx, word ptr new_key_ind
     push cx
@@ -80,14 +119,15 @@ read_char_loop:
     push cx
     push dx
     call check_each_char
-    pop dx
-    pop cx
-    pop bx
-    pop ax
+ pop dx
+pop cx
+pop bx
+pop ax
+    or ax, ax   
 
-    jmp read_next 
+    jnz read_next 
 
-
+   
 file_close:
     ;call check
     mov ah, 3Eh         
@@ -97,82 +137,50 @@ file_close:
     jmp ending
 
 
-ending:
-    mov ah, 4Ch         ; DOS function to exit the program
-    int 21h             ; Call DOS interrupt
-    ret
+; ending:
+;     mov ah, 4Ch         ; DOS function to exit the program
+;     int 21h             ; Call DOS interrupt
+;     ret
  
 ;main endp
 read_next ENDP
 
 check_each_char proc
 
-;;;;;;;;;;;;;;;;;;;;;;;;
-    ; ;call check
-    ; mov ah, 09h
-    ; mov dx, offset not_fucked
-    ; int 21h
-;;;;;;;;;;;;;;;;;;;;;;
     cmp char_buffer, 0Dh ;compares the current character with carriage return (CR, 0Dh). If they are not equal, it jumps to not_cr.
    
     jnz not_cr;стрибає
     
     mov is_key, 1 ;If the current character is not a carriage return, it sets the flag is_key to 1, indicating that it's part of a word.
- ;;;;;;;;;;;;;;;;;;;;;;;;
-    ;call check
-    ; mov ah, 09h
-    ; mov dx, offset not_fucked
-    ; int 21h
-;;;;;;;;;;;;;;;;;;;;;; 
   
     call convert_to_binary
-
     jmp end_char_check
+
 not_cr:
- 
     cmp char_buffer, 0Ah
     jnz not_lf;стрибає
-    
     mov is_key, 1
     jmp end_char_check
 not_lf:
-
     cmp char_buffer, 20h
-
     jnz not_whitespace
-
     mov is_key, 0
     call check_key_existance
-
     jmp end_char_check ;стрибає
         
 not_whitespace:
     cmp is_key, 0
     jnz is_word
-    
-
-
     mov si, offset number_buffer
-
     mov bx, number_buffer_ind
     add si, bx
     mov al, char_buffer
     mov [si], al
     inc number_buffer_ind
-
     call convert_to_binary;;;;;;;;;;----- тепер воно зайшло в конверт ту байнврі
-
-
-
     jmp end_char_check
-is_word:
 
-; ;;;;;;;;;;;;;;;;;;;;;;;;
-;     ;call check
-;     mov ah, 09h
-;     mov dx, offset not_fucked
-;     int 21h
-; ;;;;;;;;;;;;;;;;;;;;;;
+is_word:
     mov si, offset single_key_buffer
     mov bx, key_buffer_ind
     add si, bx
@@ -187,12 +195,10 @@ check_each_char endp
 
 
 convert_to_binary proc
- 
     xor bx, bx
     mov cx, 0
 
 calculate:
-
     mov si, offset number_buffer
     add si, number_buffer_ind
     dec si
@@ -200,19 +206,15 @@ calculate:
     xor ax, ax
     mov al, [si]
     cmp ax, 45
-    
     jnz not_minus
-    
     neg bx
     jmp end_calculation
 
 not_minus:
-
     sub al, '0'
     push cx
     cmp cx, 0
     jnz not_0
-
     jmp end_multiplication
 
 not_0:
@@ -224,7 +226,6 @@ not_0:
     jnz multiply_10
 
 end_multiplication:
-
     pop cx
     add bx, ax
     inc cx
@@ -232,7 +233,6 @@ end_multiplication:
     jnz calculate
 
 end_calculation:
-
     mov si, offset value_array
     mov ax, current_ind
     shl ax, 1
@@ -243,14 +243,12 @@ end_calculation:
     mov cx, 0
 
 add_0:
-
         mov si, offset number_buffer
         add si, cx
         mov [si], 0
         inc cx
         cmp cx, 9
         jnz add_0
-
     ret
 
 convert_to_binary endp
@@ -265,33 +263,24 @@ check_key_existance proc
     mov cx, 15
     mov si, offset single_key_buffer
 fill_with_0:
-
     mov [si], 0
     inc si
     loop fill_with_0
-
-
 ; Перевірка наявності нових ключів
     cmp new_key_ind, 0 ;Check if new_key_ind is zero: It checks if new_key_ind is zero.
                         ;If it's zero, it implies that there are no existing keys in the keys_array,
                         ;and the procedure jumps to the add_key label to add the new key.
-
-
     jnz key_compare ;If new_key_ind is not zero, it enters a loop labeled key_compare
                     ;to compare the new key stored in single_key_buffer with the keys in the keys_array.
-
     jmp add_key ;стрибає
-
 key_compare:
     mov dx, 0 ; Скидаємо dx на початкове значення перед входом у цикл
-
 check_key:
     mov si, offset keys_array
     mov cx, new_key_ind ; Завантажуємо довжину масиву keys_array в cx
     mov bx, 0 ; Скидаємо bx на початкове значення
 
 compare_loop:
-
     shl cx, 4
     add si, cx
     shr cx, 4
@@ -302,16 +291,13 @@ compare_loop:
     mov ah, [di]
     cmp al, ah
     jne char_not_same
-
     mov bx, 1
     jmp go_to_the_end
 
 char_not_same:
-
     mov bx, 0
 
 go_to_the_end:
-
     inc dx ; Збільшуємо dx для переходу до наступного ключа
     cmp dx, new_key_ind
     jl compare_loop ; Перевіряємо, чи є ще ключі для порівняння
@@ -321,12 +307,6 @@ go_to_the_end:
 
     ;new key
 add_key:
-; ;;;;;;;;;;;;;;;;;;;;;;;
-;     ;call check
-;      mov ah, 09h
-;      mov dx, offset not_fucked
-;      int 21h
-; ;;;;;;;;;;;;;;;;;;;;;;
         ;заходить
         mov cx, 0
         add_key_loop:
@@ -356,15 +336,8 @@ add_key:
             mov ax, 1
             mov [si], ax
             jmp check_key_existance
-
-
 found_key:
- ;;;;;;;;;;;;;;;;;;;;;;;
-    ;call check
-     mov ah, 09h
-     mov dx, offset not_fucked
-     int 21h
-;;;;;;;;;;;;;;;;;;;;;;
+
     mov current_ind, cx
     mov si, offset arrays_num
     mov cx, current_ind
@@ -381,14 +354,29 @@ found_key:
     mov cx, current_ind  ; Відновлюємо поточний індекс
     inc dx              ; Переходимо до наступного ключа
     ;jmp check_key_existance    ; Перехід на початок циклу порівняння ключів
+    call calculate_average
     ret ; Повертаємося до основного виклику check_key_existance
 
 check_key_existance endp
 
 calculate_average proc
+; заходить
+ ;;;;;;;;;;;;;;;;;;;;;;;
+    ;call check
+     mov ah, 09h
+     mov dx, offset not_fucked
+     int 21h
+;;;;;;;;;;;;;;;;;;;;;;
     mov cx, 0
 
 average_loop:
+; заходить
+ ;;;;;;;;;;;;;;;;;;;;;;;
+    ;call check
+     mov ah, 09h
+     mov dx, offset not_fucked
+     int 21h
+;;;;;;;;;;;;;;;;;;;;;;
     mov si, offset value_array
     shl cx, 1
     add si, cx
@@ -403,7 +391,6 @@ average_loop:
     inc cx
     cmp cx, new_key_ind
     jnz average_loop
-
     ret
 calculate_average endp
 
@@ -603,57 +590,5 @@ next_step:
     call bubble_sort
     ret
 bubble_sort endp
-
-; check proc
-;     mov ah, 09h
-;     mov dx, offset not_fucked
-;     int 21h
-; check endp
-
-;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-; printArrays proc
-;     mov cx, word ptr new_key_ind ; Load the number of keys
-
-; printLoop:
-;     ; Print key
-;     mov si, offset single_key_buffer
-;     mov di, offset keys_array
-;     mov bx, word ptr new_key_ind
-;     shl bx, 4 ; Multiply by 16 (size of a key)
-;     add di, bx ; Point to the current key
-;     mov dx, 16 ; Key size
-;     call printString
-
-;     ; Print value
-;     mov ax, [si] ; Load the value
-;     call printNumber
-;     call printNewLine
-
-;     ; Move to the next key
-;     add si, 16 ; Move to the next key in the buffer
-;     loop printLoop
-
-;     ret
-; printArrays endp
-
-; printString proc
-;     mov ah, 09h ; Print string
-;     int 21h
-;     ret
-; printString endp
-
-; printNumber proc
-;     ; Your code to print a number goes here
-;     ret
-; printNumber endp
-
-; printNewLine proc
-;     mov ah, 02h ; Print character
-;     mov dl, 0Dh ; Carriage return
-;     int 21h
-;     mov dl, 0Ah ; Line feed
-;     int 21h
-;     ret
-; printNewLine endp
 
 end main
