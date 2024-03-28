@@ -261,12 +261,11 @@ check_key_existance proc
     mov cx, 0
     mov dx, 0
 
-
-
     ; Заповнення масиву single_key_buffer нулями
     mov cx, 15
     mov si, offset single_key_buffer
 fill_with_0:
+
     mov [si], 0
     inc si
     loop fill_with_0
@@ -307,46 +306,97 @@ fill_with_0:
 
 key_compare: ;The loop iterates through each key in the array, comparing each character
              ;of the current key with the characters of the keys in the array.
-;заходить
-;;;;;;;;;;;;;;;;;;;;;;;
-    ;call check
-     mov ah, 09h
-     mov dx, offset not_fucked
-     int 21h
-;;;;;;;;;;;;;;;;;;;;;
-    mov dx, 0
+; ;заходить
+;     ;;;;;;;;;;;;;;;;;;;;;;;
+;     ;call check
+;      mov ah, 09h
+;      mov dx, offset not_fucked
+;      int 21h
+; ;;;;;;;;;;;;;;;;;;;;;
+    mov dx, 0 ; Скидаємо dx на початкове значення перед входом у цикл
 
-    check_key:
-        mov si, offset keys_array
-        shl cx, 4
-        add si, cx
-        shr cx, 4
-        add si, dx
-        mov al, [si]
-        mov di, offset single_key_buffer
-        add di, dx
-        mov ah, [di]
-        cmp al, ah
-        jne char_not_same
+check_key:
+; ;заходить
+;     ;;;;;;;;;;;;;;;;;;;;;;;
+;     ;call check
+;      mov ah, 09h
+;      mov dx, offset not_fucked
+;      int 21h
+; ;;;;;;;;;;;;;;;;;;;;;
+    mov si, offset keys_array
+    mov cx, new_key_ind ; Завантажуємо довжину масиву keys_array в cx
+    mov bx, 0 ; Скидаємо bx на початкове значення
 
-        mov bx, 1
-        jmp go_to_the_end
+compare_loop:
+    shl cx, 4
+    add si, cx
+    shr cx, 4
+    add si, dx
+    mov al, [si]
+    mov di, offset single_key_buffer
+    add di, dx
+    mov ah, [di]
+    cmp al, ah
+    jne char_not_same
 
-    char_not_same:
-        mov bx, 0
-        mov dx, 15
- go_to_the_end:
-        inc dx
-        cmp dx, 16
-        jnz check_key
+    mov bx, 1
+    jmp go_to_the_end
 
-    cmp bx, 0
-    jnz found_key
+char_not_same:
+    mov bx, 0
+    mov dx, 15
+go_to_the_end:
+    inc dx
+    cmp dx, 16
+    jnz compare_loop ; Перевіряємо, чи дійшли до кінця масиву
 
-    inc cx
-    cmp cx, new_key_ind
-    jne key_compare
+cmp bx, 0
+jnz found_key
 
+inc cx
+cmp cx, new_key_ind
+jne key_compare
+
+; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; ;нескінченний луп
+;  mov dx, 0 ; Скидаємо dx на початкове значення перед входом у цикл
+;     check_key:
+;     ;;;;;;;;;;;;;;;;;;;;;;;
+;     ;call check
+;      mov ah, 09h
+;      mov dx, offset not_fucked
+;      int 21h
+; ;;;;;;;;;;;;;;;;;;;;;
+;         mov si, offset keys_array
+;         shl cx, 4
+;         add si, cx
+;         shr cx, 4
+;         add si, dx
+;         mov al, [si]
+;         mov di, offset single_key_buffer
+;         add di, dx
+;         mov ah, [di]
+;         cmp al, ah
+;         jne char_not_same
+
+;         mov bx, 1
+;         jmp go_to_the_end
+
+;     char_not_same:
+;         mov bx, 0
+;         mov dx, 15
+;  go_to_the_end:
+;         inc dx
+;         cmp dx, 16
+;         jnz check_key
+
+;     cmp bx, 0
+;     jnz found_key
+
+;     inc cx
+;     cmp cx, new_key_ind
+;     jne key_compare
+; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     ;new key
 add_key:
     ;заходить
