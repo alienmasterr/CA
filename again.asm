@@ -304,30 +304,21 @@ fill_with_0:
 
     jmp add_key ;стрибає
 
-key_compare: ;The loop iterates through each key in the array, comparing each character
-             ;of the current key with the characters of the keys in the array.
-; ;заходить
-;     ;;;;;;;;;;;;;;;;;;;;;;;
-;     ;call check
-;      mov ah, 09h
-;      mov dx, offset not_fucked
-;      int 21h
-; ;;;;;;;;;;;;;;;;;;;;;
+key_compare:
     mov dx, 0 ; Скидаємо dx на початкове значення перед входом у цикл
 
 check_key:
-; ;заходить
-;     ;;;;;;;;;;;;;;;;;;;;;;;
-;     ;call check
-;      mov ah, 09h
-;      mov dx, offset not_fucked
-;      int 21h
-; ;;;;;;;;;;;;;;;;;;;;;
     mov si, offset keys_array
     mov cx, new_key_ind ; Завантажуємо довжину масиву keys_array в cx
     mov bx, 0 ; Скидаємо bx на початкове значення
 
 compare_loop:
+    ;;;;;;;;;;;;;;;;;;;;;;;
+    ;call check
+     mov ah, 09h
+     mov dx, offset not_fucked
+     int 21h
+;;;;;;;;;;;;;;;;;;;;;;
     shl cx, 4
     add si, cx
     shr cx, 4
@@ -344,18 +335,66 @@ compare_loop:
 
 char_not_same:
     mov bx, 0
-    mov dx, 15
+
 go_to_the_end:
-    inc dx
-    cmp dx, 16
-    jnz compare_loop ; Перевіряємо, чи дійшли до кінця масиву
+    inc dx ; Збільшуємо dx для переходу до наступного ключа
+    cmp dx, new_key_ind
+    jl compare_loop ; Перевіряємо, чи є ще ключі для порівняння
 
-cmp bx, 0
-jnz found_key
+    cmp bx, 0
+    jnz found_key
 
-inc cx
-cmp cx, new_key_ind
-jne key_compare
+    ret
+
+; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; key_compare: ;The loop iterates through each key in the array, comparing each character
+;              ;of the current key with the characters of the keys in the array.
+; ; ;заходить
+;     mov dx, 0 ; Скидаємо dx на початкове значення перед входом у цикл
+
+; check_key:
+; ; ;заходить
+;     mov si, offset keys_array
+;     mov cx, new_key_ind ; Завантажуємо довжину масиву keys_array в cx
+;     mov bx, 0 ; Скидаємо bx на початкове значення
+
+; ;тепер нескінченний луп тут
+; compare_loop:
+; ;заходить
+;     ;;;;;;;;;;;;;;;;;;;;;;;
+;     ;call check
+;      mov ah, 09h
+;      mov dx, offset not_fucked
+;      int 21h
+; ;;;;;;;;;;;;;;;;;;;;;
+;     shl cx, 4
+;     add si, cx
+;     shr cx, 4
+;     add si, dx
+;     mov al, [si]
+;     mov di, offset single_key_buffer
+;     add di, dx
+;     mov ah, [di]
+;     cmp al, ah
+;     jne char_not_same
+
+;     mov bx, 1
+;     jmp go_to_the_end
+
+; char_not_same:
+;     mov bx, 0
+;     mov dx, 15
+; go_to_the_end:
+;     inc dx
+;     cmp dx, 16
+;     jnz compare_loop ; Перевіряємо, чи дійшли до кінця масиву
+
+; cmp bx, 0
+; jnz found_key
+
+; inc cx
+; cmp cx, new_key_ind
+; jne key_compare
 
 ; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; ;нескінченний луп
