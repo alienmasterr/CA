@@ -21,7 +21,6 @@ main proc
     mov ax, @data
     mov ds, ax  ; Ініціалізація реєстру сегмента даних
 
-
 read_next:
     mov ah, 3Fh
     mov bx, 0  
@@ -78,10 +77,9 @@ check_each_char proc ;перевіряє, чи є символ символом 
 
     jmp end_check_each_char
 
-    not_cr:
+    not_cr: ;символом нового рядка
         cmp char,0Ah
         jnz not_lf
-
 
     cmp not_numeric,0
     jnz end_check_each_char
@@ -89,7 +87,7 @@ check_each_char proc ;перевіряє, чи є символ символом 
     call to_num
     jmp end_check_each_char
     
-    not_lf:
+    not_lf: ;пробіл
         cmp char,20h
         jnz not_whitespace
 
@@ -97,7 +95,7 @@ check_each_char proc ;перевіряє, чи є символ символом 
     call search_for_key
     jmp end_check_each_char
 
-    not_whitespace:
+    not_whitespace: ;Якщо not_numeric не дорівнює 0, значення char додається до буфера ключів
         cmp not_numeric, 0
         jnz found_a_key
       
@@ -109,37 +107,35 @@ check_each_char proc ;перевіряє, чи є символ символом 
         inc num_buffer_ind
         jmp end_check_each_char
 
-found_a_key:
-        mov si, offset keys_buffer
-        mov bx, helping_key_ind 
-        add si, bx
-        mov al, char
-        mov [si], al
-        inc helping_key_ind 
-      
+found_a_key: 
+        mov si, offset keys_buffer ;Завантажуємо адресу початку буфера ключів в регістр SI
+        mov bx, helping_key_ind ; Завантажуємо індекс допоміжного ключа в регістр BX
+        add si, bx ; Додаємо індекс до адреси буфера для зміщення до правильного місця
+        mov al, char ; Завантажуємо значення символу `char` в регістр AL
+        mov [si], al ; Зберігаємо символ у відповідному місці буфера ключів
+        inc helping_key_ind ; Збільшуємо індекс допоміжного ключа, щоб вказати на наступне вільне місце у буфері
 
 end_check_each_char:
     ret
  check_each_char endp   
 
-
             ;до масиву numbers_array.
             ;зберігається в масиві, а потім буфер скидається
 to_num PROC
     xor bx, bx
-    mov cx, 0
+    xor cx, cx
 
 to_binary_from_ascii:
     ; Convert ASCII characters to numerical values and accumulate in BX
-    mov si, offset numbers_buffer
-    add si, num_buffer_ind
-    dec si
+    mov si, offset numbers_buffer ;Завантаження адреси початку буфера чисел в регістр SI
+    add si, num_buffer_ind ;Додавання індексу буфера до адреси для зміщення до поточного значення
+    dec si ; Зменшення адреси на одиницю для доступу до поточного символу
     sub si, cx
 
     xor ax, ax
-    mov al, [si]
+    mov al, [si] ; Завантаження значення ASCII-символу в регістр AL
 
-    cmp al, 45
+    cmp al, 45 ; '-'
     jnz not_negative
         neg bx
         jmp finished_conversion
@@ -147,83 +143,82 @@ to_binary_from_ascii:
     not_negative:
         sub al, '0'
 
-    push cx
+    push cx ;на стек
     cmp cx, 0
     jnz not_zero
-    jmp stop_conversion
+    jmp stop_conversion ; Якщо 0, завершуємо
 
     not_zero:
         ten_multiplication:
             mov dx, 10
-            mul dx
-            dec cx
+            mul dx ; Множення AX на DX, результат у DX:AX
+            dec cx ;як лічильник
             cmp cx, 0
             jnz ten_multiplication
 
     stop_conversion:
-    pop cx
+    pop cx ;Відновлення
     add bx, ax
 
     inc cx
-    cmp cx, num_buffer_ind
+    cmp cx, num_buffer_ind ;; Порівняння CX з індексом буфера чисел
     jnz to_binary_from_ascii
 
     finished_conversion:
-    ; Update the value in the numbers_array
-    mov si, offset numbers_array
+     ; Оновлення значення у масиві
+    mov si, offset numbers_array ;; Завантаження адреси початку масиву
     mov ax, starting_ind
-    shl ax, 1
-    add si, ax
-    add bx, [si]
-    mov [si], bx
+    shl ax, 1 ; Зсув AX на один біт вліво (еквівалент множенню на 2)
+    add si, ax ;; Додавання AX до адреси для зміщення до відповідного місця в масиві
+    add bx, [si] ; Додавання значення BX до вмісту пам'яті за адресою, збереженою в SI
+    mov [si], bx ;рез в масив
 
     ; Reset buffers and counters
     mov num_buffer_ind, 0
-    mov cx, 0
+    xor cx, cx
 
-    ; Set the contents of numbers_buffer to zeroes
+        ; Заповнення вмісту буфера чисел нулями
     array_to_zeroes:
-        mov si, offset numbers_buffer
-        add si, cx
+        mov si, offset numbers_buffer 
+        add si, cx 
         mov word ptr [si], 0
         inc cx
-        cmp cx, 9
+        cmp cx, 9 ; Порівняння з максимальним значенням лічильника
         jnz array_to_zeroes
 
     ret
 to_num ENDP
 
-
 search_for_key proc ;Перевіряє, чи вже існує поточне слово (збережене в keys_buffer) в масиві keys_array
                     ;Якщо воно існує, збільшує кількість в масиві keys_number, що відповідає цьому ключу.
                     ;Якщо ні, то додає слово до масиву keys та встановлює його кількість на 1 в масиві keys_number.
-    mov ax,0
-    mov bx, 0; 
-    mov cx, 0
-    mov dx,0
+    xor ax,ax
+    xor bx, bx; 
+    xor cx, cx
+    xor dx,dx
 
     cmp next_ind,0
     jnz identify_key
 jmp add_key  
     identify_key:
-    mov dx,0
+    xor dx,dx
         check_key_existance:
-        mov si, offset keys_array
-        shl cx, 4
-        add si, cx
+        mov si, offset keys_array ; Завантаження адреси початку масиву ключів в SI
+        shl cx, 4 ; Зсув лічильника вліво на 4 біти для використання як індексу масиву ключів
+        add si, cx ; Додавання лічильника до адреси масиву для зміщення до відповідного місця
         shr cx,4
-        add si, dx; 
-        mov al,[si]; 
+        add si, dx; ; Додавання DX для доступу до відповідного символу в масиві ключів
+        mov al,[si]; ; Завантаження символу з масиву ключів в AL
         mov di, offset keys_buffer
-        add di,dx
-        mov ah, [di]; 
+        add di,dx ; Додавання DX для доступу до відповідного символу в буфері ключів
+        mov ah, [di]; ; Завантаження символу з буфера ключів в AH
         cmp al,ah
         jne not_same
             mov bx,1; 
             jmp length_check
             not_same:
                 mov bx,0; 
-                mov dx, 15; 
+                mov dx, 15; ; Встановлення DX на максимальну довжину ключа
         length_check:
             inc dx
             cmp dx,max_key_length
@@ -239,22 +234,20 @@ jmp add_key
     add_key:
     
    ;
-    mov di, offset keys_array   
+    mov di, offset keys_array   ; Завантаження адреси початку масиву ключів в DI
     mov ax,  next_ind
 
      mov si, offset keys_buffer   ; 
     add si, cx
 
+    add di,cx ; Додавання лічильника до адреси масиву для зміщення до відповідного місця
 
-   
-    add di,cx
-
-     shl ax,4 
+     shl ax,4 ; Зсув AX на 4 біти вліво для використання як індексу масиву ключів
 
     add di, ax ;
     
-    mov al, [si]
-    mov [di], al 
+    mov al, [si] ; Завантаження символу з буфера ключів в AL
+    mov [di], al ; Збереження символу у відповідному місці масиву ключів
     inc cx
     cmp cx, max_key_length
     jnz add_key
@@ -293,7 +286,6 @@ go_to_end:
     cmp cx,15
     jnz add_zeroes  
     ret
-
 
 search_for_key endp
 
